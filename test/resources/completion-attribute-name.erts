@@ -1,0 +1,248 @@
+Code: (lambda () (completion-transform "Project"))
+
+Point-Char: |
+
+Name: Attribute Declaration, Project, No Name, Without "use"
+
+=-=
+project Test is
+   for |
+=-=-=
+
+Name: Attribute Declaration, Project, No Name, With "use"
+
+=-=
+project Test is
+   for | use
+=-=-=
+
+Name: Attribute Declaration, Project, No Name, With Upper-case "use"
+
+=-=
+project Test is
+   for | USE
+=-=-=
+
+Code: completion-transform
+
+Name: Attribute Declaration, No Name, Point next to "for"
+
+=-=
+project Test is
+   for|
+=-=-=
+
+Name: Attribute Declaration, No Name, Point next to "use"
+
+=-=
+project Test is
+   for |use
+=-=-=
+
+Name: Attribute Declaration, No Name, Point next to Upper-case "use"
+
+=-=
+project Test is
+   for |USE
+=-=-=
+
+Name: Attribute Declaration, Partial Name, Point at end
+
+=-=
+project Test is
+   for Mai|
+=-=
+project Test is
+   for Main|
+=-=-=
+
+Name: Attribute Declaration, Partial Name, Point in middle
+
+=-=
+project Test is
+   for M|ai
+=-=
+project Test is
+   for Main|
+=-=-=
+
+Name: Attribute Declaration, Partial Name, Point at start
+
+=-=
+project Test is
+   for |Mai
+=-=
+project Test is
+   for Main|
+=-=-=
+
+Name: Attribute Declaration, Partial Case-Different Name
+
+=-=
+project Test is
+   for mai|
+=-=
+project Test is
+   for Main|
+=-=-=
+
+Name: Attribute Declaration, Complete Case-Different Name
+
+=-=
+project Test is
+   for main|
+=-=
+project Test is
+   for Main|
+=-=-=
+
+Name: Attribute Declaration, Partial Name, Point not Near (Before with space)
+
+=-=
+project Test is
+   for | mai
+=-=-=
+
+Name: Attribute Declaration, Complete Name, Point not Near (Before with space)
+
+=-=
+project Test is
+   for | Main
+=-=-=
+
+Name: Attribute Declaration, Partial Name, Point not Near (After with space)
+
+=-=
+project Test is
+   for mai |
+=-=-=
+
+Name: Attribute Declaration, Case-Insensitive "for"
+
+=-=
+project Test is
+   FOR mai|
+=-=
+project Test is
+   FOR Main|
+=-=-=
+
+Name: Attribute Declaration, Non-Matching Name
+
+=-=
+project Test is
+   for XYZ|
+=-=-=
+
+Code: (lambda () (completion-transform "Compiler"))
+
+Name: Attribute Declaration, Package, No Name, Without "use"
+
+=-=
+project Test is
+   package Compiler is
+      for |
+=-=-=
+
+Code: (lambda () (completion-transform "Project"))
+
+Name: Attribute Reference, Project, No Name
+
+=-=
+project Test is
+   package Compiler is
+      X := Project'|
+=-=-=
+
+Name: Attribute Reference, Project, Case-Insensitive "project"
+
+=-=
+project Test is
+   package Compiler is
+      X := project'|
+=-=-=
+
+Code: completion-transform
+
+Name: Attribute Reference, Partial Name, Point at end
+
+=-=
+project Test is
+   package Compiler is
+      X := project'Project_D|
+=-=
+project Test is
+   package Compiler is
+      X := project'Project_Dir|
+=-=-=
+
+Name: Attribute Reference, Partial Name, Point in middle
+
+=-=
+project Test is
+   package Compiler is
+      X := project'Pr|oject_D
+=-=
+project Test is
+   package Compiler is
+      X := project'Project_Dir|
+=-=-=
+
+Name: Attribute Reference, Partial Name, Point at start
+
+=-=
+project Test is
+   package Compiler is
+      X := project'|Project_D
+=-=
+project Test is
+   package Compiler is
+      X := project'Project_Dir|
+=-=-=
+
+Name: Attribute Reference, Partial Case-Different Name
+
+=-=
+project Test is
+   package Compiler is
+      X := project'project_d|
+=-=
+project Test is
+   package Compiler is
+      X := project'Project_Dir|
+=-=-=
+
+Name: Attribute Reference, Complete Case-Different Name
+
+=-=
+project Test is
+   package Compiler is
+      X := project'project_dir|
+=-=
+project Test is
+   package Compiler is
+      X := project'Project_Dir|
+=-=-=
+
+Code: (lambda () (completion-transform "Compiler"))
+
+Name: Attribute Reference, Package, No Name
+
+=-=
+project Test is
+   X := Compiler'|
+=-=-=
+
+Name: Attribute Reference, Package, Case-Insensitive "compiler"
+
+=-=
+project Test is
+   X := compiler'|
+=-=-=
+
+Name: Attribute Reference, External Package, No Name
+
+=-=
+project Test is
+   X := Shared.Compiler'|
+=-=-=

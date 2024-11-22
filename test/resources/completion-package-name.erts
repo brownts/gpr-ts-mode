@@ -1,0 +1,135 @@
+Code: (lambda () (completion-transform 'all-packages))
+
+Point-Char: |
+
+Name: No Name, Without "is"
+
+=-=
+project Test is
+   package |
+=-=-=
+
+Name: No Name, With "is"
+
+=-=
+project Test is
+   package | is
+=-=-=
+
+Name: No Name, With Upper-case "is"
+
+=-=
+project Test is
+   package | IS
+=-=-=
+
+Code: completion-transform
+
+Name: No Name, Point next to "package"
+
+=-=
+project Test is
+   package|
+=-=-=
+
+Name: No Name, Point next to "is"
+
+=-=
+project Test is
+   package |is
+=-=-=
+
+Name: No Name, Point next to Upper-case "is"
+
+=-=
+project Test is
+   package |IS
+=-=-=
+
+Name: Partial Name, Point at end
+
+=-=
+project Test is
+   package Comp|
+=-=
+project Test is
+   package Compiler|
+=-=-=
+
+Name: Partial Name, Point in middle
+
+=-=
+project Test is
+   package Co|mp
+=-=
+project Test is
+   package Compiler|
+=-=-=
+
+Name: Partial Name, Point at start
+
+=-=
+project Test is
+   package |Comp
+=-=
+project Test is
+   package Compiler|
+=-=-=
+
+Name: Partial Case-Different Name
+
+=-=
+project Test is
+   package comp|
+=-=
+project Test is
+   package Compiler|
+=-=-=
+
+Name: Complete Case-Different Name
+
+=-=
+project Test is
+   package compiler|
+=-=
+project Test is
+   package Compiler|
+=-=-=
+
+Name: Partial Name, Point not Near (Before with space)
+
+=-=
+project Test is
+   package | comp
+=-=-=
+
+Name: Complete Name, Point not Near (Before with space)
+
+=-=
+project Test is
+   package | Compiler
+=-=-=
+
+Name: Partial Name, Point not Near (After with space)
+
+=-=
+project Test is
+   package comp |
+=-=-=
+
+Name: Case-Insensitive "package"
+
+=-=
+project Test is
+   PACKAGE comp|
+=-=
+project Test is
+   PACKAGE Compiler|
+=-=-=
+
+Name: Non-Matching Name
+
+=-=
+project Test is
+   package XYZ|
+=-=-=

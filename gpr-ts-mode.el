@@ -1280,6 +1280,8 @@ the name of the branch given the branch node."
        (cons name index)))
    gpr-ts-mode-imenu-categories))
 
+(require 'gpr-ts-completion)
+
 ;;;###autoload
 (define-derived-mode gpr-ts-mode prog-mode "GNAT Project"
   "Major mode for editing GNAT Project files, powered by tree-sitter."
@@ -1365,6 +1367,9 @@ the name of the branch given the branch node."
                 (keyword string type)
                 (attribute function number operator package variable)
                 (bracket delimiter error)))
+
+  ;; Completion.
+  (add-hook 'completion-at-point-functions #'gpr-ts-mode--completion-at-point nil t)
 
   (treesit-major-mode-setup)
 

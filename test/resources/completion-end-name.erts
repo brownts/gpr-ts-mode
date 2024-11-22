@@ -1,0 +1,252 @@
+Point-Char: |
+
+Name: Project, No Name
+
+=-=
+project Test is
+end |
+=-=
+project Test is
+end Test|
+=-=-=
+
+Name: Project, No Name, Point next to "end"
+
+=-=
+project Test is
+end|
+=-=-=
+
+Name: Project, No Name, With Semicolon
+
+=-=
+project Test is
+end |;
+=-=
+project Test is
+end Test|;
+=-=-=
+
+Name: Project, Partial Matching Name
+
+=-=
+project Test is
+end Te|
+=-=
+project Test is
+end Test|
+=-=-=
+
+Name: Project, Partial Matching Name, With Semicolon
+
+=-=
+project Test is
+end Te|;
+=-=
+project Test is
+end Test|;
+=-=-=
+
+Name: Project, Non-Matching Name
+
+=-=
+project Test is
+end XY|
+=-=-=
+
+Name: Project, Partial Case-Different Name
+
+=-=
+project Test is
+end te|
+=-=
+project Test is
+end Test|
+=-=-=
+
+Name: Project, Complete Case-Different Name
+
+=-=
+project Test is
+end test|
+=-=
+project Test is
+end Test|
+=-=-=
+
+Name: Project, Partial Matching Name, Point not Near (Before with space)
+
+=-=
+project Test is
+end | te
+=-=-=
+
+Name: Project, Non-Matching Name, Point not Near (Before with space)
+
+=-=
+project Test is
+end | package
+=-=
+project Test is
+end Test package
+=-=-=
+
+Name: Project, Partial Matching Name, Point not Near (After with space)
+
+=-=
+project Test is
+end te |
+=-=-=
+
+Name: Project, Non-Matching Name, Point not Near (After with space)
+
+=-=
+project Test is
+end package |
+=-=-=
+
+Name: Project, Case-Insensitive "end"
+
+=-=
+project Test is
+END |
+=-=
+project Test is
+END Test|
+=-=-=
+
+Name: Project, Dotted Partial (Without ".")
+
+=-=
+project XYZ.Test is
+end XY|
+=-=
+project XYZ.Test is
+end XYZ.Test|
+=-=-=
+
+Name: Project, Dotted Partial Name (With ".")
+
+=-=
+project XYZ.Test is
+end XYZ.T|
+=-=
+project XYZ.Test is
+end XYZ.Test|
+=-=-=
+
+Name: Project, Dotted Partial Name (Ends with ".")
+
+=-=
+project XYZ.Test is
+end XYZ.|
+=-=
+project XYZ.Test is
+end XYZ.Test|
+=-=-=
+
+Name: Case Construction, No keyword
+
+=-=
+project Test is
+   package Compiler is
+      case Build is
+         when "Debug" =>
+            null;
+            end |
+=-=
+project Test is
+   package Compiler is
+      case Build is
+         when "Debug" =>
+            null;
+            end case|
+=-=-=
+
+Name: Case Construction, Partial keyword
+
+=-=
+project Test is
+   package Compiler is
+      case Build is
+         when "Debug" =>
+            null;
+            end ca|
+=-=
+project Test is
+   package Compiler is
+      case Build is
+         when "Debug" =>
+            null;
+            end case|
+=-=-=
+
+Name: Case Construction, Case Matching
+
+=-=
+project Test is
+   package Compiler is
+      CASE Build is
+         when "Debug" =>
+            null;
+            end ca|
+=-=
+project Test is
+   package Compiler is
+      CASE Build is
+         when "Debug" =>
+            null;
+            end CASE|
+=-=-=
+
+Name: Package, No Name
+
+=-=
+project Test is
+   package Compiler is
+   end |
+=-=
+project Test is
+   package Compiler is
+   end Compiler|
+=-=-=
+
+Name: Package, Partial Matching Name
+
+=-=
+project Test is
+   package Compiler is
+   end Co|
+=-=
+project Test is
+   package Compiler is
+   end Compiler|
+=-=-=
+
+Name: Package, No Name, Complete Project
+
+=-=
+project Test is
+   package Compiler is
+   end |
+end Test;
+=-=
+project Test is
+   package Compiler is
+   end Compiler
+end Test;
+=-=-=
+
+Name: Package, No Name, With Semicolon, Complete Project
+
+=-=
+project Test is
+   package Compiler is
+   end |;
+end Test;
+=-=
+project Test is
+   package Compiler is
+   end Compiler;
+end Test;
+=-=-=

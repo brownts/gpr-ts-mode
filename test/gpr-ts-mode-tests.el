@@ -27,6 +27,50 @@
 (require 'treesit)
 (require 'which-func)
 
+(defun completion-transform (&optional package)
+  "Completion transform function for test, constrained by PACKAGE.
+
+When PACKAGE is a string, check that completion returns a list of
+attributes names specific to PACKAGE (or top-level project attributes
+when PACKAGE is the special \"Project\" package name).  When PACKAGE is
+nil, call completion at point to update the buffer.  Otherwise, check
+that completion returns a list of all package names."
+  (gpr-ts-mode)
+  (setq-local completion-show-inline-help nil)
+  (let ((inhibit-message t))
+    (cond
+     ((stringp package)
+      (let ((completions (gpr-ts-mode--completion-at-point)))
+        (should completions)
+        (should (= (nth 0 completions) (point)))
+        (should (= (nth 1 completions) (point)))
+        (should
+         (seq-set-equal-p
+          (all-completions "" (nth 2 completions))
+          (seq-map
+           (lambda (item)
+             (cond ((stringp item) item)
+                   ((consp item) (car item))))
+           (plist-get
+            (cdr (assoc-string package
+                               gpr-ts-mode-completion-definitions
+                               'case-fold))
+            :attributes))))))
+     ((null package)
+      (completion-at-point))
+     (t
+      (let ((completions (gpr-ts-mode--completion-at-point)))
+        (should completions)
+        (should (= (nth 0 completions) (point)))
+        (should (= (nth 1 completions) (point)))
+        (should
+         (seq-set-equal-p
+          (all-completions "" (nth 2 completions))
+          (seq-difference
+           (seq-map #'car gpr-ts-mode-completion-definitions)
+           '("Project")
+           #'string-equal-ignore-case))))))))
+
 (defun default-transform (&optional expect-error)
   "Default transform function for test.
 
@@ -163,6 +207,7 @@ use line indentation strategy."
   (let* ((file-noext (file-name-sans-extension file))
          (file-path (ert-resource-file file))
          (transform (cond ((string-suffix-p "-nl" file-noext) #'newline-transform)
+                          ((string-prefix-p "completion" file-noext) #'completion-transform)
                           ((string-prefix-p "filling" file-noext) #'filling-transform)
                           ((string-prefix-p "indent" file-noext) #'indent-transform)
                           (t #'default-transform))))

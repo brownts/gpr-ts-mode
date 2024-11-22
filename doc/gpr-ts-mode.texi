@@ -51,6 +51,7 @@ required for @samp{outline-minor-mode} to work with @samp{gpr-ts-mode}.
 * Indentation::
 * Navigation::
 * Imenu::
+* Completion::
 * Troubleshooting::
 * Example Configuration::
 * Resources::
@@ -69,6 +70,7 @@ Troubleshooting
 
 * Org Mode Source Code Blocks::
 * LSP Overriding Imenu::
+* LSP Overriding Completion::
 
 @end detailmenu
 @end menu
@@ -416,12 +418,45 @@ order to create a category, a new category symbol should be added to
 category symbol name.  Refer to existing instances of this function to
 understand how current category index functions are implemented.
 
+@node Completion
+@chapter Completion
+
+This major mode provides its own set of completions for GNAT Project
+buffers.  The completions are organized by completion categories
+(i.e., package name completion, attribute name completion, etc).
+Individual categories can be enabled or disabled as desired through
+customization.  Furthermore, the set of categories can be extended to
+provide categories not originally envisioned.
+
+@defopt gpr-ts-mode-completion-categories
+The set of categories to be used for completion.  Categories can be
+removed from this set to tailor completion if desired.  If no
+completions are desired, setting to nil will disable all @samp{gpr-ts-mode}
+provided completions.
+@end defopt
+
+@defopt gpr-ts-mode-completion-definitions
+Definitions used to populate package and attribute completions.
+Attributes are specified based on the package (or top-level project)
+in which they belong, providing package-specific attribute name
+completions.
+@end defopt
+
+If none of the existing categories are sufficient, or an additional
+category is desired, a custom category can be created and used.  In
+order to create a category, a new category symbol should be added to
+@samp{gpr-ts-mode-completion-categories} and an implementation of
+@samp{gpr-ts-mode-completion-at-point} should be created, specializing on the
+new category symbol name.  Refer to existing instances of this
+function to understand how current category functions are implemented.
+
 @node Troubleshooting
 @chapter Troubleshooting
 
 @menu
 * Org Mode Source Code Blocks::
 * LSP Overriding Imenu::
+* LSP Overriding Completion::
 @end menu
 
 @node Org Mode Source Code Blocks
@@ -463,6 +498,31 @@ For @samp{lsp-mode}, LSP-provided Imenu is disabled by clearing the
 @lisp
 (setq lsp-enable-imenu nil)
 @end lisp
+
+@node LSP Overriding Completion
+@section LSP Overriding Completion
+
+The mode's completion support might be overridden if an LSP client is
+used with the major mode.  This might be fine for cases where the
+completion functionality provided via LSP is equivalent to what is
+provided by the mode.  However, if the mode provides additional
+completion capability not provided via LSP, this may be undesirable.
+When the LSP client completion support does not explicitly indicate
+that it's completion support is ``not exclusive'', Emacs may not query
+the mode's completion support.  To identify the completion provider,
+the first thing to do is examine the buffer-local
+@samp{completion-at-point-functions} variable.  It's a list of completion
+functions.  They will be queried in the order listed.  If the
+@samp{gpr-ts-mode}'s completion function is not listed first, it won't be
+queried first (or maybe at all depending on the provider's exclusivity
+setting).  It should be obvious from the function name listed whether
+the provider is an LSP client.
+
+For Eglot, LSP-provided completion can be disabled by adding
+@samp{:completionProvider} to @samp{eglot-ignored-server-capabilities}.  For
+@samp{lsp-mode}, completion can be configured through the
+@code{lsp-completion-enable} user option.  Additionally, completion can be
+toggled manually with the @samp{lsp-completion-mode} minor mode.
 
 @node Example Configuration
 @chapter Example Configuration
