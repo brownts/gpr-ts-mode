@@ -1,0 +1,35 @@
+Code: (lambda () (electric-indent-transform "n"))
+
+Point-Char: |
+
+Name: case_item (1)
+
+=-=
+project Test is
+   case X is
+      when "1" =>
+         null;
+         whe|
+=-=
+project Test is
+   case X is
+      when "1" =>
+         null;
+      when|
+=-=-=
+
+Name: case_item (2)
+
+=-=
+project Test is
+   case X is
+      when "1" =>
+         null;
+      when|
+=-=
+project Test is
+   case X is
+      when "1" =>
+         null;
+         whenn|
+=-=-=

@@ -23,9 +23,12 @@
 (require 'ert-font-lock nil 'noerror) ; Emacs 30+
 (require 'ert-x)
 (require 'gpr-ts-mode)
+(require 'gpr-ts-mode-test-utils)
 (require 'imenu)
 (require 'treesit)
 (require 'which-func)
+
+;;;; Transform Functions
 
 (defun completion-transform (&optional package)
   "Completion transform function for test, constrained by PACKAGE.
@@ -71,17 +74,25 @@ that completion returns a list of all package names."
            '("Project")
            #'string-equal-ignore-case))))))))
 
-(defun default-transform (&optional expect-error)
+(defun default-transform (&optional expect-error setup)
   "Default transform function for test.
 
-If EXPECT-ERROR is non-nil, then check for an error in the parse tree,
-otherwise check that there is no error in the parse tree."
+If EXPECT-ERROR is \\='t\\=' or \\='expect-error\\=', then check for an
+error in the parse tree, else if EXPECT-ERROR is \\='nil\\=', check that
+there is no error in the parse tree, otherwise no check is performed.
+
+SETUP can be used to perform custom initialization."
   (gpr-ts-mode)
-  (if expect-error
-      (should (treesit-search-subtree
-               (treesit-buffer-root-node) "ERROR"))
-    (should (not (treesit-search-subtree
-                  (treesit-buffer-root-node) "ERROR")))))
+  (setq-local indent-tabs-mode nil)
+  (cond ((or (eq expect-error 't)
+             (eq expect-error 'expect-error))
+         (should (treesit-search-subtree
+                  (treesit-buffer-root-node) "ERROR")))
+        ((eq expect-error 'nil)
+         (should (not (treesit-search-subtree
+                       (treesit-buffer-root-node) "ERROR")))))
+  (when setup
+    (funcall setup)))
 
 (defun defun-transform (name)
   "Defun NAME transform function for test."
@@ -144,23 +155,25 @@ check that there is no error in the parse tree."
 SETUP can be used to perform custom initialization.  If EXPECT-ERROR is
 non-nil, then check for an error in the parse tree, otherwise check that
 there is no error in the parse tree."
-  (default-transform expect-error)
-  (setq-local indent-tabs-mode nil)
-  (when setup
-    (funcall setup))
-  (goto-char (point-min))
-  (cl-flet ((line-length () (- (line-end-position)
-                               (line-beginning-position))))
-    (while (not (eobp))
-      (if (> (line-length) 0)
-          (if (= (following-char) ?\s)
-              (while (and (> (line-length) 0)
-                          (= (following-char) ?\s))
-                (delete-char 1))
-            (insert-char ?\s)))
-      (forward-line 1)
-      (beginning-of-line)))
-  (indent-region (point-min) (point-max)))
+  (default-transform expect-error setup)
+  (let ((anchor-catch-all 'gpr-ts-indent--anchor-catch-all))
+    (should (fboundp anchor-catch-all))
+    (cl-letf (((symbol-function anchor-catch-all)
+               (lambda ()
+                 (lambda (node parent bol &rest _)
+                   (let ((prefix "Indentation using catch-all rule: ")
+                         (suffix (format "[NODE: %s, PARENT: %s, BOL: %s" node parent bol)))
+                     (ert-fail (concat prefix suffix)))))))
+      (gpr-ts-mode-tests--modify-and-reindent))))
+
+(defun electric-indent-transform (key &optional setup)
+  "Electric Indentation transform function for test.
+
+KEY is used to trigger the electric indentation condition.  SETUP can be
+used to perform custom initialization before the test."
+  (default-transform 'dont-care setup)
+  (gpr-ts-mode-tests--check-indentation)
+  (gpr-ts-mode-tests--simulate-key-press key))
 
 (defun mode-transform (&optional version)
   "Mode transform function for test.
@@ -200,6 +213,8 @@ use line indentation strategy."
       (setq-local gpr-ts-mode-indent-strategy 'declaration)
     (setq-local gpr-ts-mode-indent-strategy 'line))
   (call-interactively #'newline))
+
+;;;; Test Loop
 
 (dolist (file (directory-files (ert-resource-directory)
                                nil

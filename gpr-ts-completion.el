@@ -21,6 +21,7 @@
 
 ;;; Code:
 
+(require 'gpr-ts-core)
 (require 'cl-generic)
 (eval-when-compile (require 'rx))
 (require 'treesit)
@@ -32,10 +33,6 @@
 (declare-function treesit-node-parent        "treesit.c" (node))
 (declare-function treesit-node-start         "treesit.c" (node))
 (declare-function treesit-node-type          "treesit.c" (node))
-
-(declare-function gpr-ts-mode--defun-name "gpr-ts-mode" (node))
-(declare-function gpr-ts-mode--tree-text  "gpr-ts-mode" (node &optional ignored-types region-beg-type))
-(declare-function gpr-ts-mode--enclosing-compound "gpr-ts-mode" (compound-info pos))
 
 (defcustom gpr-ts-mode-completion-categories
   '(end-name package-name attribute-name)
@@ -485,18 +482,12 @@ The following keywords are meaningful:
 (defun gpr-ts-mode--compound-name (node)
   "Find name associated with compound NODE or node text if no name exists."
   (pcase (treesit-node-type node)
-    ((or "package_declaration" "project_declaration")
-     (gpr-ts-mode--defun-name node))
-    ((or "package" "project") ; incomplete compound
-     (let ((next (treesit-node-next-sibling node)))
-       (while (and next (treesit-node-check next 'extra))
-         (setq next (treesit-node-next-sibling next)))
-       (let ((type (treesit-node-type next)))
-         (when (and type
-                    (or (string-equal type "identifier")
-                        (string-equal type "name")))
-           (substring-no-properties
-            (gpr-ts-mode--tree-text next '("comment")))))))
+    ((or "package" "project")
+     (when-let* ((next-node (gpr-ts-mode--next-node node))
+                 (next-node-t (treesit-node-type next-node))
+                 ((member next-node-t '("identifier" "name"))))
+       (substring-no-properties
+        (gpr-ts-mode--tree-text next-node '("comment")))))
     (_ (treesit-node-text node 'no-property))))
 
 ;;;; Completion Documentation Buffer
@@ -593,10 +584,7 @@ ATTRIBUTE-NAME."
                     (re-search-backward (rx (or bol whitespace) "for" whitespace) (pos-bol))
                     (treesit-node-at (point))))
                  ;; Find enclosing package
-                 (package-node
-                  (gpr-ts-mode--enclosing-compound
-                   '(("package" . (:compound-type "package_declaration")))
-                   (treesit-node-start for-node)))
+                 (package-node (gpr-ts-mode--matching-prev-node for-node "package"))
                  ;; Find compound name
                  (compound-name
                   (if package-node
@@ -754,20 +742,9 @@ ATTRIBUTE-NAME."
                  (if (null start)
                      (cons (point) (point))
                    (cons start end))))
-              (enclosing-node
-               (gpr-ts-mode--enclosing-compound
-                '(("case"    . ( :compound-type "case_construction"))
-                  ("package" . ( :compound-type "package_declaration"))
-                  ("project" . ( :compound-type "project_declaration"
-                                 :predicate
-                                 ;; Don't anchor to a "project" keyword
-                                 ;; used in an attribute reference.
-                                 (lambda (anchor &optional _node)
-                                   (let* ((next (treesit-node-next-sibling anchor))
-                                          (next-type (treesit-node-type next)))
-                                     (or (null next-type)
-                                         (not (string-equal next-type "'"))))))))
-                (car bounds)))
+              (enclosing-node (gpr-ts-mode--matching-prev-node
+                               (treesit-node-at (car bounds))
+                               '("case" "package" "project")))
               (compound-name (gpr-ts-mode--compound-name enclosing-node))
               (match-info
                (pcase (treesit-node-type enclosing-node)

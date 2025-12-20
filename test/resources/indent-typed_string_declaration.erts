@@ -59,7 +59,7 @@ abstract project Colors is
        "Green",
        -- before blue
        "Blue"
-     -- after blue
+       -- after blue
      );
 end Colors;
 =-=-=

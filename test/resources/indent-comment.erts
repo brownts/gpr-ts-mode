@@ -20,7 +20,7 @@ is
                             ,
                             -- between string literals
                             "Release"
-                           -- after last string literal
+                            -- after last string literal
                            );
    -- before variable declaration
    Build_Mode : Build_Mode_Type :=
@@ -32,7 +32,7 @@ is
         ,
         -- between parameters
         "Debug"
-       -- after last parameter
+        -- after last parameter
        );
 
    -- before case

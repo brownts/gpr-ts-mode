@@ -346,7 +346,7 @@ If none of the existing indentation strategies are sufficient, a
 custom strategy can be created and used.  In order to create a
 strategy, a new strategy symbol should be specified in
 @samp{gpr-ts-mode-indent-strategy}, and an implementation of
-@samp{gpr-ts-mode-indent} should be created, specializing on the new strategy
+@samp{gpr-ts-indent--line} should be created, specializing on the new strategy
 symbol name.  Refer to existing instances of this function to
 understand how current strategy functions are implemented.
 
