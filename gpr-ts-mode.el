@@ -384,9 +384,6 @@ the name of the branch given the branch node."
   :group 'gpr-ts
 
   ;; Grammar.
-  (setq-local treesit-language-source-alist
-              `((gpr . ,(ensure-list gpr-ts-mode-grammar))))
-
   (when (and (treesit-available-p)
              (not (treesit-language-available-p 'gpr))
              (pcase gpr-ts-mode-grammar-install
@@ -481,6 +478,11 @@ the name of the branch given the branch node."
   (if (boundp 'major-mode-remap-defaults)
       (add-to-list 'major-mode-remap-defaults '(gpr-mode . gpr-ts-mode))
     (add-to-list 'major-mode-remap-alist '(gpr-mode . gpr-ts-mode))))
+
+;; Register mode's default grammar
+(add-to-list 'treesit-language-source-alist
+             `(gpr . ,(ensure-list gpr-ts-mode-grammar))
+             'append)
 
 ;; Lazily register mode's info lookup help.
 (with-eval-after-load 'info-look
