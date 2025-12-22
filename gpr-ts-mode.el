@@ -448,10 +448,6 @@ the name of the branch given the branch node."
   ;; EditorConfig (Emacs 30+)
   (setq-local editorconfig-indent-size-vars '(gpr-ts-mode-indent-offset))
 
-  ;; Eglot (Emacs 29+)
-  (setq-local eglot-server-programs
-              '((gpr-ts-mode . ("ada_language_server" "--language-gpr"))))
-
   ;; Font-lock.
   (setq-local treesit-font-lock-settings gpr-ts-mode--font-lock-settings)
   (setq-local treesit-font-lock-feature-list
