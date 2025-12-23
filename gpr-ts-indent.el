@@ -682,6 +682,27 @@ following electric punctuation or electric keywords."
 
 (add-hook 'gpr-ts-mode--after-setup-hook #'gpr-ts-indent--post-setup)
 
+;;; Fill / Reindent Defun
+
+(defun gpr-ts-mode-fill-reindent-defun (&optional justify)
+  "Refill or reindent the paragraph or defun containing point.
+
+If the point is in a comment, fill the paragraph that contains point or
+follows point.  Otherwise, re-indent the defun that contains point.
+
+If JUSTIFY is non-nil (interactively, with prefix argument), and filling
+a paragraph, justify as well."
+  (interactive "P" gpr-ts-mode)
+  (save-excursion
+    (if-let* ((node (treesit-node-at (point)))
+              (node-t (treesit-node-type node))
+              ((string-equal node-t "comment")))
+        (fill-paragraph justify (region-active-p))
+      (when-let* ((node (treesit-defun-at-point))
+                  (start (treesit-node-start node))
+                  (end (treesit-node-end node)))
+        (indent-region start end nil)))))
+
 (provide 'gpr-ts-indent)
 
 ;;; gpr-ts-indent.el ends here

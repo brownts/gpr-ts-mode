@@ -378,6 +378,16 @@ the name of the branch given the branch node."
 (require 'gpr-ts-casing)
 (require 'gpr-ts-completion)
 
+(defvar gpr-ts-mode-map
+  (let ((map (make-sparse-keymap)))
+    ;; Backport `prog-fill-reindent-defun' to Emacs 29 and avoid the
+    ;; Emacs 30 issue where `prog-fill-reindent-defun' would reindent
+    ;; the wrong defun, as reported in https://debbugs.gnu.org/78703.
+    (unless (boundp 'prog-fill-reindent-defun-function)
+      (define-key map (kbd "M-q") #'gpr-ts-mode-fill-reindent-defun))
+    map)
+  "Keymap for `gpr-ts-mode'.")
+
 ;;;###autoload
 (define-derived-mode gpr-ts-mode prog-mode "GNAT Project"
   "Major mode for editing GNAT Project files, powered by tree-sitter."
