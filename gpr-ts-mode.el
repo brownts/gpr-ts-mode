@@ -388,6 +388,43 @@ the name of the branch given the branch node."
     map)
   "Keymap for `gpr-ts-mode'.")
 
+(defun gpr-ts-mode--browse-menu-url (item)
+  "Browse URL for Menu ITEM."
+  (let* ((current-repo
+          (lm-website (locate-library "gpr-ts-mode.el")))
+         (example-repo
+          (replace-regexp-in-string "/[^/]+\\'" "/dotemacs-ada" current-repo))
+         (repo-issues
+          (concat current-repo "/issues"))
+         (alist
+          `((example . ,example-repo)
+            (issues  . ,repo-issues)
+            (guide   . "https://docs.adacore.com/gprbuild-docs/html/gprbuild_ug.html"))))
+    (browse-url (alist-get item alist))))
+
+(easy-menu-define gpr-ts-mode-menu gpr-ts-mode-map
+  "Menu keymap for `gpr-ts-mode'."
+  '("GNAT Project"
+    ["Toggle Auto-Casing"             gpr-ts-auto-case-mode                   t]
+    ["Case Format Buffer"             gpr-ts-mode-case-format-buffer          t]
+    ["Case Format Point/Region"       gpr-ts-mode-case-format-dwim            t]
+    ["-----"                          nil                                     nil]
+    ["Re-Indent Defun / Fill Comment" gpr-ts-mode-fill-reindent-defun
+     :visible (not (boundp 'prog-fill-reindent-defun-function))]
+    ["Re-Indent Defun / Fill Comment" prog-fill-reindent-defun
+     :visible (boundp 'prog-fill-reindent-defun-function)]
+    ["Re-Indent Buffer"               (indent-region (point-min) (point-max)) t]
+    ["-----"                          nil                                     nil]
+    ["Beginning of Defun"             treesit-beginning-of-defun              t]
+    ["End of Defun"                   treesit-end-of-defun                    t]
+    ["-----"                          nil                                     nil]
+    ("Help"
+     ["GPR Mode Manual"               (info "(gpr-ts-mode)Top")               t]
+     ["Example Configuration"         (gpr-ts-mode--browse-menu-url 'example) t]
+     ["Report An Issue"               (gpr-ts-mode--browse-menu-url 'issues)  t]
+     ["GPRbuild User's Guide"         (gpr-ts-mode--browse-menu-url 'guide)   t])
+    ["Customize"                      (customize-group 'gpr-ts)               t]))
+
 ;;;###autoload
 (define-derived-mode gpr-ts-mode prog-mode "GNAT Project"
   "Major mode for editing GNAT Project files, powered by tree-sitter."
