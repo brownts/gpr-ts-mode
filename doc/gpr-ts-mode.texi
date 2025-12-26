@@ -424,8 +424,8 @@ category is desired, a custom category can be created and used.  In
 order to create a category, a new category symbol should be added to
 @samp{gpr-ts-mode-imenu-categories}, a name mapping should be added to
 @samp{gpr-ts-mode-imenu-category-name-alist}, and an implementation of
-@samp{gpr-ts-mode-imenu-index} should be created, specializing on the new
-category symbol name.  Refer to existing instances of this function to
+@samp{gpr-ts-imenu-index} should be created, specializing on the new category
+symbol name.  Refer to existing instances of this function to
 understand how current category index functions are implemented.
 
 @node Casing
