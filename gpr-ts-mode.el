@@ -95,6 +95,94 @@ specified.  See `treesit-language-source-alist' for full details."
     table)
   "Syntax table for `gpr-ts-mode'.")
 
+(defun gpr-ts-mode--project-keyword-p (node)
+  "Check if NODE is a project keyword."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "project")))
+    (let* ((prev-node (gpr-ts-mode--prev-node node))
+           (prev-node-t (treesit-node-type prev-node)))
+      (or (null prev-node)
+          (member prev-node-t '("with_declaration"
+                                "project_qualifier"))))))
+
+(defun gpr-ts-mode--package-declaration-name-p (node)
+  "Check if NODE is a package_declaration name."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "identifier"))
+              (prev-node (gpr-ts-mode--prev-node node))
+              (prev-node-t (treesit-node-type prev-node)))
+    (or (string-equal prev-node-t "package")
+        (and (string-equal prev-node-t "end")
+             (when-let*
+                 ((parent-node (gpr-ts-mode--matching-prev-node
+                                prev-node '("package" "project" "case")))
+                  (parent-node-t (treesit-node-type parent-node))
+                  ((string-equal parent-node-t "package"))
+                  (name-node (gpr-ts-mode--next-node parent-node))
+                  (name-node-t (treesit-node-type name-node))
+                  ((string-equal name-node-t "identifier")))
+               (string-equal-ignore-case
+                (treesit-node-text node)
+                (treesit-node-text name-node)))))))
+
+(defun gpr-ts-mode--attribute-declaration-name-p (node)
+  "Check if NODE is an attribute_declaration name."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "identifier"))
+              (prev-node (gpr-ts-mode--prev-node node))
+              (prev-node-t (treesit-node-type prev-node)))
+    (string-equal prev-node-t "for")))
+
+(defun gpr-ts-mode--typed-string-declaration-name-p (node)
+  "Check if NODE is a typed_string_declaration name."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "identifier"))
+              (prev-node (gpr-ts-mode--prev-node node))
+              (prev-node-t (treesit-node-type prev-node)))
+    (string-equal prev-node-t "type")))
+
+(defun gpr-ts-mode--variable-declaration-name-p (node)
+  "Check if NODE is a variable_declaraton name."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "identifier"))
+              (next-node (gpr-ts-mode--next-node node))
+              (next-node-t (treesit-node-type next-node)))
+    (and (member next-node-t '(":" ":="))
+         (let* ((prev-node (gpr-ts-mode--prev-node node))
+                (prev-node-t (treesit-node-type prev-node)))
+           (or (null prev-node)
+               (not (string-equal prev-node-t ":")))))))
+
+(defun gpr-ts-mode--variable-declaration-type-p (node)
+  "Check if NODE is a variable_declaration type."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "identifier"))
+              (prev-node (gpr-ts-mode--prev-node node))
+              (prev-node-t (treesit-node-type prev-node)))
+    (string-equal prev-node-t ":")))
+
+(defun gpr-ts-mode--package-extends-or-renames-name-p (node)
+  "Check if NODE is a package_declaration name.
+
+The name must be for a package extension or package rename, and as such,
+must reside immediately after an \\='extends\\=' or \\='renames\\='
+keyword respectively.
+
+Additionally, the \\='identifier\\=', if within a \\='name\\=' node,
+must be the last segment of the name."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "identifier"))
+              (parent-node (treesit-node-parent node))
+              (parent-node-t (treesit-node-type parent-node)))
+    (if (string-equal parent-node-t "name")
+        (unless (null (treesit-node-next-sibling node))
+          (setq parent-node nil))
+      (setq parent-node node))
+    (when parent-node
+      (when-let* ((prev-node (gpr-ts-mode--prev-node parent-node))
+                  (prev-node-t (treesit-node-type prev-node)))
+        (member prev-node-t '("extends" "renames"))))))
+
 (defvar gpr-ts-mode--font-lock-settings
   (treesit-font-lock-rules
 
@@ -116,13 +204,18 @@ specified.  See `treesit-language-source-alist' for full details."
    ;; Definition
    :language 'gpr
    :feature 'definition
-   '((package_declaration name: (identifier) @font-lock-function-name-face)
-     ((package_declaration endname: (identifier) @font-lock-function-name-face)
-      @package-declaration
-      (:pred gpr-ts-mode--package-declaration-names-match-p @package-declaration))
-     (typed_string_declaration name: (identifier) @font-lock-type-face)
-     (variable_declaration name: (identifier) @font-lock-variable-name-face)
-     (attribute_declaration name: (identifier) @font-lock-property-name-face))
+   '(;; package_declaration
+     ((identifier) @font-lock-function-name-face
+      (:pred gpr-ts-mode--package-declaration-name-p @font-lock-function-name-face))
+     ;; typed_string_declaration
+     ((identifier) @font-lock-type-face
+      (:pred gpr-ts-mode--typed-string-declaration-name-p @font-lock-type-face))
+     ;; variable_declaration
+     ((identifier) @font-lock-variable-name-face
+      (:pred gpr-ts-mode--variable-declaration-name-p @font-lock-variable-name-face))
+     ;; attribute_declaration
+     ((identifier) @font-lock-property-name-face
+      (:pred gpr-ts-mode--attribute-declaration-name-p @font-lock-property-name-face)))
 
    ;; Delimiters
    :language 'gpr
@@ -139,7 +232,8 @@ specified.  See `treesit-language-source-alist' for full details."
    :language 'gpr
    :feature 'keyword
    `(([,@gpr-ts-mode--keywords] @font-lock-keyword-face)
-     (project_declaration "project" @font-lock-keyword-face)
+     ("project" @font-lock-keyword-face
+      (:pred gpr-ts-mode--project-keyword-p @font-lock-keyword-face))
      ((project_qualifier) @font-lock-keyword-face))
 
    ;; Numeric literals
@@ -150,9 +244,10 @@ specified.  See `treesit-language-source-alist' for full details."
    ;; Package
    :language 'gpr
    :feature 'package
-   '((package_declaration
-      [ origname: (name (identifier) @font-lock-function-call-face :anchor)
-        basename: (name (identifier) @font-lock-function-call-face :anchor)])
+   '(;; package_declaration extends/renames
+     ((identifier) @font-lock-function-call-face
+      (:pred gpr-ts-mode--package-extends-or-renames-name-p @font-lock-function-call-face))
+     ;; Package Name in variable_reference
      ((variable_reference (name (identifier) @font-lock-function-call-face))
       (:pred gpr-ts-mode--package-name-p @font-lock-function-call-face)))
 
@@ -164,7 +259,9 @@ specified.  See `treesit-language-source-alist' for full details."
    ;; Types
    :language 'gpr
    :feature 'type
-   '((variable_declaration type: (name (identifier) @font-lock-type-face :anchor)))
+   '(;; variable_declaration
+     ((name (identifier) @font-lock-type-face :anchor)
+      (:pred gpr-ts-mode--variable-declaration-type-p @font-lock-type-face)))
 
    ;; Variables
    :language 'gpr
@@ -180,7 +277,6 @@ specified.  See `treesit-language-source-alist' for full details."
    ;; Syntax errors
    :language 'gpr
    :feature 'error
-   :override t
    '((ERROR) @font-lock-warning-face))
 
   "Font-lock settings for `gpr-ts-mode'.")

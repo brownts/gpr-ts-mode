@@ -1,0 +1,299 @@
+* Attribute Declaration
+
+#+NAME: attribute_declaration-1
+#+BEGIN_SRC gpr
+project Test is
+   for Main
+   -- <- font-lock-keyword-face
+   --  ^ font-lock-property-name-face
+#+END_SRC
+
+#+NAME: attribute_declaration-2
+#+BEGIN_SRC gpr
+project Test is
+   for Main use
+   -- <-    ^ font-lock-keyword-face
+   --  ^ font-lock-property-name-face
+#+END_SRC
+
+#+NAME: attribute_declaration-3
+#+BEGIN_SRC gpr
+project Test is
+   for Main use ("test")
+   -- <-    ^ font-lock-keyword-face
+   --  ^ font-lock-property-name-face
+   --           ^      ^ font-lock-bracket-face
+   --            ^ font-lock-string-face
+#+END_SRC
+
+* Package Declaration
+
+#+NAME: package_declaration-1
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler
+   -- ^ font-lock-keyword-face
+   --      ^ font-lock-function-name-face
+#+END_SRC
+
+#+NAME: package_declaration-2
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler is
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+#+END_SRC
+
+#+NAME: package_declaration-3
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler is
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+   end
+   -- <- font-lock-keyword-face
+#+END_SRC
+
+#+NAME: package_declaration-4
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler is
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+   end Compiler
+   -- <- font-lock-keyword-face
+   --  ^ font-lock-function-name-face
+#+END_SRC
+
+** Package Extension
+
+#+NAME: package_declaration-extends-1
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler extends
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+#+END_SRC
+
+#+NAME: package_declaration-extends-2
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler extends Foo
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+      --                    ^ font-lock-function-call-face
+#+END_SRC
+
+#+NAME: package_declaration-extends-3
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler extends Shared.Foo
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+      --                    ^ nil
+      --                          ^ font-lock-delimiter-face
+      --                           ^ font-lock-function-call-face
+#+END_SRC
+
+#+NAME: package_declaration-extends-4
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler extends Shared.Foo is
+      -- <-         ^                  ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+      --                    ^ nil
+      --                          ^ font-lock-delimiter-face
+      --                           ^ font-lock-function-call-face
+#+END_SRC
+
+** Package Renaming
+
+#+NAME: package_declaration-renames-1
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler renames
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+#+END_SRC
+
+#+NAME: package_declaration-renames-2
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler renames Foo
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+      --                    ^ font-lock-function-call-face
+#+END_SRC
+
+#+NAME: package_declaration-renames-3
+#+BEGIN_SRC gpr
+project Test is
+   package Compiler renames Shared.Foo
+      -- <-         ^ font-lock-keyword-face
+      --   ^ font-lock-function-name-face
+      --                    ^ nil
+      --                          ^ font-lock-delimiter-face
+      --                           ^ font-lock-function-call-face
+#+END_SRC
+
+* Project Declaration
+
+#+NAME: project_declaration-1
+#+BEGIN_SRC gpr
+project Test
+-- <- font-lock-keyword-face
+--      ^ nil
+#+END_SRC
+
+#+NAME: project_declaration-2
+#+BEGIN_SRC gpr
+project Test is
+   -- <-     ^ font-lock-keyword-face
+   --   ^ nil
+#+END_SRC
+
+#+NAME: project_declaration-3
+#+BEGIN_SRC gpr
+project Test is
+   -- <-     ^ font-lock-keyword-face
+   --   ^ nil
+end
+-- <- font-lock-keyword-face
+#+END_SRC
+
+#+NAME: project_declaration-4
+#+BEGIN_SRC gpr
+project Test is
+   -- <-     ^ font-lock-keyword-face
+   --   ^ nil
+end Test
+-- <- font-lock-keyword-face
+--  ^ nil
+#+END_SRC
+
+** Project Extension
+
+#+NAME: project_declaration-extends-1
+#+BEGIN_SRC gpr
+project Test extends
+-- <-        ^ font-lock-keyword-face
+--      ^ nil
+#+END_SRC
+
+#+NAME: project_declaration-extends-2
+#+BEGIN_SRC gpr
+project Test extends "file.gpr"
+-- <-        ^ font-lock-keyword-face
+--      ^ nil
+--                   ^ font-lock-string-face
+#+END_SRC
+
+#+NAME: project_declaration-extends-3
+#+BEGIN_SRC gpr
+project Test extends "file.gpr" is
+-- <-        ^                  ^ font-lock-keyword-face
+--      ^ nil
+--                   ^ font-lock-string-face
+#+END_SRC
+
+#+NAME: project_declaration-extends-4
+#+BEGIN_SRC gpr
+project Test extends all
+-- <-        ^       ^ font-lock-keyword-face
+--      ^ nil
+#+END_SRC
+
+#+NAME: project_declaration-extends-5
+#+BEGIN_SRC gpr
+project Test extends all "file.gpr"
+-- <-        ^       ^ font-lock-keyword-face
+--      ^ nil
+--                       ^ font-lock-string-face
+#+END_SRC
+
+#+NAME: project_declaration-extends-6
+#+BEGIN_SRC gpr
+project Test extends all "file.gpr" is
+-- <-        ^       ^              ^ font-lock-keyword-face
+--      ^ nil
+--                       ^ font-lock-string-face
+#+END_SRC
+
+* Typed String Declaration
+
+#+NAME: typed_string_declaration-1
+#+BEGIN_SRC gpr
+project Test is
+   type Foo
+   -- <- font-lock-keyword-face
+   --   ^ font-lock-type-face
+#+END_SRC
+
+#+NAME: typed_string_declaration-2
+#+BEGIN_SRC gpr
+project Test is
+   type Foo is
+   -- <-    ^ font-lock-keyword-face
+   --   ^ font-lock-type-face
+#+END_SRC
+
+#+NAME: typed_string_declaration-3
+#+BEGIN_SRC gpr
+project Test is
+   type Foo is ("A", "B")
+   -- <-    ^ font-lock-keyword-face
+   --   ^ font-lock-type-face
+   --          ^        ^ font-lock-bracket-face
+   --           ^    ^ font-lock-string-face
+   --              ^ font-lock-delimiter-face
+#+END_SRC
+
+* Variable Declaration
+
+#+NAME: variable_declaration-1
+#+BEGIN_SRC gpr
+project Test is
+   Foo :
+   -- <- font-lock-variable-name-face
+   --  ^ font-lock-delimiter-face
+#+END_SRC
+
+#+NAME: variable_declaration-2
+#+BEGIN_SRC gpr
+project Test is
+   Foo : Foo_Type
+   -- <- font-lock-variable-name-face
+   --  ^ font-lock-delimiter-face
+   --    ^ font-lock-type-face
+#+END_SRC
+
+#+NAME: variable_declaration-3
+#+BEGIN_SRC gpr
+project Test is
+   Foo : Foo_Type :
+   -- <- font-lock-variable-name-face
+   --  ^          ^ font-lock-delimiter-face
+   --    ^ font-lock-type-face
+#+END_SRC
+
+#+NAME: variable_declaration-4
+#+BEGIN_SRC gpr
+project Test is
+   Foo : Foo_Type :=
+   -- <- font-lock-variable-name-face
+   --  ^ font-lock-delimiter-face
+   --    ^ font-lock-type-face
+   --             ^ font-lock-operator-face
+#+END_SRC
+
+#+NAME: variable_declaration-5
+#+BEGIN_SRC gpr
+project Test is
+   Foo :=
+   -- <- font-lock-variable-name-face
+   --  ^ font-lock-operator-face
+#+END_SRC
+
+# Local Variables:
+# org-edit-src-content-indentation: 0
+# End:
