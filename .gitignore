@@ -4,3 +4,4 @@ dist/
 *-autoloads.el
 *.elc
 *.info
+Eldev-local
