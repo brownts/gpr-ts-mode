@@ -1,6 +1,6 @@
 ;;; gpr-ts-indent.el -- Indentation support in GPR Project files -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023-2025 Troy Brown
+;; Copyright (C) 2023-2026 Troy Brown
 
 ;; This file is not part of GNU Emacs.
 

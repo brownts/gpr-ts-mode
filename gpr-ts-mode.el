@@ -1,6 +1,6 @@
 ;;; gpr-ts-mode.el --- Major mode for GNAT project files using Tree-Sitter  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023-2025 Troy Brown
+;; Copyright (C) 2023-2026 Troy Brown
 
 ;; Author: Troy Brown <brownts@troybrown.dev>
 ;; Created: February 2023
