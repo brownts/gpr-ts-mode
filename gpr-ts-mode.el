@@ -285,12 +285,11 @@ must be the last segment of the name."
 (require 'gpr-ts-completion)
 
 (defvar gpr-ts-mode-map
-  (let ((map (make-sparse-keymap)))
-    ;; Backport `prog-fill-reindent-defun' to Emacs 29 and avoid the
-    ;; Emacs 30 issue where `prog-fill-reindent-defun' would reindent
-    ;; the wrong defun, as reported in https://debbugs.gnu.org/78703.
-    (unless (boundp 'prog-fill-reindent-defun-function)
-      (define-key map (kbd "M-q") #'gpr-ts-mode-fill-reindent-defun))
+  (let ((map (make-sparse-keymap))
+        (key (if (fboundp 'prog-fill-reindent-defun)
+                 "<remap> <prog-fill-reindent-defun>"
+               "M-q")))
+    (keymap-set map key #'gpr-ts-mode-fill-reindent-defun)
     map)
   "Keymap for `gpr-ts-mode'.")
 
@@ -314,16 +313,13 @@ must be the last segment of the name."
     ["Toggle Auto-Casing"             gpr-ts-auto-case-mode                   t]
     ["Case Format Buffer"             gpr-ts-mode-case-format-buffer          t]
     ["Case Format Point/Region"       gpr-ts-mode-case-format-dwim            t]
-    ["-----"                          nil                                     nil]
-    ["Re-Indent Defun / Fill Comment" gpr-ts-mode-fill-reindent-defun
-     :visible (not (boundp 'prog-fill-reindent-defun-function))]
-    ["Re-Indent Defun / Fill Comment" prog-fill-reindent-defun
-     :visible (boundp 'prog-fill-reindent-defun-function)]
+    "-----"
+    ["Re-Indent Defun / Fill Comment" gpr-ts-mode-fill-reindent-defun         t]
     ["Re-Indent Buffer"               (indent-region (point-min) (point-max)) t]
-    ["-----"                          nil                                     nil]
+    "-----"
     ["Beginning of Defun"             treesit-beginning-of-defun              t]
     ["End of Defun"                   treesit-end-of-defun                    t]
-    ["-----"                          nil                                     nil]
+    "-----"
     ("Help"
      ["GPR Mode Manual"               (info "(gpr-ts-mode)Top")               t]
      ["Example Configuration"         (gpr-ts-mode--browse-menu-url 'example) t]
