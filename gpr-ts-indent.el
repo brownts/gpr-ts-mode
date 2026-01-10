@@ -710,6 +710,12 @@ a paragraph, justify as well."
                     (end (treesit-node-end node)))
           (indent-region start end nil))))))
 
+(defun gpr-ts-mode-reindent-buffer ()
+  "Reindent buffer."
+  (interactive nil gpr-ts-mode)
+  (without-restriction
+    (indent-region (point-min) (point-max))))
+
 (provide 'gpr-ts-indent)
 
 ;;; gpr-ts-indent.el ends here

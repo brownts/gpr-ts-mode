@@ -315,7 +315,7 @@ must be the last segment of the name."
     ["Case Format Point/Region"       gpr-ts-mode-case-format-dwim            t]
     "-----"
     ["Re-Indent Defun / Fill Comment" gpr-ts-mode-fill-reindent-defun         t]
-    ["Re-Indent Buffer"               (indent-region (point-min) (point-max)) t]
+    ["Re-Indent Buffer"               gpr-ts-mode-reindent-buffer             t]
     "-----"
     ["Beginning of Defun"             treesit-beginning-of-defun              t]
     ["End of Defun"                   treesit-end-of-defun                    t]
