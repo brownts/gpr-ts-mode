@@ -34,6 +34,8 @@
 
 ;;; Code:
 
+(require 'gpr-ts-casing)
+(require 'gpr-ts-completion)
 (require 'gpr-ts-core)
 (require 'gpr-ts-imenu)
 (require 'gpr-ts-indent)
@@ -81,6 +83,19 @@ specified.  See `treesit-language-source-alist' for full details."
   :group 'gpr-ts
   :link '(custom-manual :tag "Grammar Installation" "(gpr-ts-mode)Grammar Installation")
   :package-version '(gpr-ts-mode . "0.5.0"))
+
+(defcustom gpr-ts-mode-package-names
+  (sort
+   (seq-filter
+    (lambda (elt) (not (string-equal-ignore-case "Project" elt)))
+    (seq-map #'car gpr-ts-mode-completion-definitions))
+   #'string-lessp)
+  "List of known package names."
+  :type '(repeat string)
+  :group 'gpr-ts
+  :link '(custom-manual :tag "Syntax Highlighting" "(gpr-ts-mode)Syntax Highlighting")
+  :package-version '(gpr-ts-mode . "0.6.0"))
+;;;###autoload(put 'gpr-ts-mode-package-names 'safe-local-variable #'list-of-strings-p)
 
 (defvar gpr-ts-mode-syntax-table
   (let ((table (make-syntax-table)))
@@ -183,6 +198,13 @@ must be the last segment of the name."
                   (prev-node-t (treesit-node-type prev-node)))
         (member prev-node-t '("extends" "renames"))))))
 
+(defun gpr-ts-mode--package-name-p (node)
+  "Check if NODE identifier matches a known package name."
+  (let ((identifier (treesit-node-text node t)))
+    (seq-find
+     (apply-partially #'string-equal-ignore-case identifier)
+     gpr-ts-mode-package-names)))
+
 (defvar gpr-ts-mode--font-lock-settings
   (treesit-font-lock-rules
 
@@ -280,9 +302,6 @@ must be the last segment of the name."
    '((ERROR) @font-lock-warning-face))
 
   "Font-lock settings for `gpr-ts-mode'.")
-
-(require 'gpr-ts-casing)
-(require 'gpr-ts-completion)
 
 (defvar gpr-ts-mode-map
   (let ((map (make-sparse-keymap))

@@ -33,27 +33,6 @@
   :link '(custom-manual "(gpr-ts-mode)Top")
   :prefix "gpr-ts-mode-")
 
-(defcustom gpr-ts-mode-package-names
-  '(;; Intrinsic
-    "Binder" "Builder" "Clean" "Compiler" "Gnatls"
-    "Install" "Linker" "Naming" "Remote"
-    ;; IDE related
-    "IDE" "Ant" "Make"
-    ;; Extra tools
-    "Analyzer" "Check" "Codepeer" "Coverage" "DSA"
-    "Documentation" "Emulator" "GNATtest" "Format"
-    "Metrics" "Pretty_Printer" "Prove" "QGen"
-    "Stack" "Stub"
-    ;; Legacy
-    "Cross_Reference" "Eliminate" "Finder"
-    "GNATstub" "Synchronize")
-  "List of known package names."
-  :type '(repeat string)
-  :group 'gpr-ts
-  :link '(custom-manual :tag "Syntax Highlighting" "(gpr-ts-mode)Syntax Highlighting")
-  :package-version '(gpr-ts-mode . "0.6.0"))
-;;;###autoload(put 'gpr-ts-mode-package-names 'safe-local-variable #'list-of-strings-p)
-
 ;;; Private Hooks
 
 (defvar gpr-ts-mode--after-setup-hook nil
@@ -256,13 +235,6 @@ Return non-nil to indicate it is."
   "Determine if NODE is a string within a with clause."
   (and (gpr-ts-mode--with-declaration-p (treesit-node-parent node))
        (string-equal (treesit-node-type node) "string_literal")))
-
-(defun gpr-ts-mode--package-name-p (node)
-  "Check if NODE identifier matches a known package name."
-  (let ((identifier (treesit-node-text node t)))
-    (seq-find
-     (apply-partially #'string-equal-ignore-case identifier)
-     gpr-ts-mode-package-names)))
 
 (defun gpr-ts-mode--package-declaration-names-match-p (node)
   "Check if names match in package declaration NODE."
