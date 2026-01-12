@@ -174,7 +174,8 @@ the DICTIONARY takes precedence over the FORMATTER."
 (defun gpr-ts-mode-case-format-buffer ()
   "Apply case formatting to entire buffer."
   (interactive nil gpr-ts-mode)
-  (gpr-ts-mode-case-format-region (point-min) (point-max)))
+  (without-restriction
+    (gpr-ts-mode-case-format-region (point-min) (point-max))))
 
 (defun gpr-ts-mode-case-format-at-point ()
   "Apply case formatting at point."
