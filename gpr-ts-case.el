@@ -1,4 +1,4 @@
-;;; gpr-ts-casing.el --- Casing support in GNAT project files  -*- lexical-binding: t; -*-
+;;; gpr-ts-case.el --- Casing support in GNAT project files  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024-2026 Troy Brown
 
@@ -22,6 +22,7 @@
 ;;; Code:
 
 (require 'cl-generic)
+(require 'gpr-ts-core)
 (require 'rx)
 (require 'treesit)
 
@@ -77,7 +78,7 @@ The following keywords are meaningful:
   :link '(custom-manual :tag "Casing" "(gpr-ts-mode)Casing")
   :package-version '(gpr-ts-mode . "0.7.0"))
 
-(defun gpr-ts-mode--case-format-word (beg end formatter &optional dictionary)
+(defun gpr-ts-case--format-word (beg end formatter &optional dictionary)
   "Apply case formatting to word bounded by BEG and END using FORMATTER.
 
 When words or subwords are found in the DICTIONARY, the formatting in
@@ -149,9 +150,9 @@ the DICTIONARY takes precedence over the FORMATTER."
       (when-let* ((entry
                    (seq-find
                     (lambda (entry)
-                      (gpr-ts-mode-case-category-p (car entry) node))
+                      (gpr-ts-case-category-p (car entry) node))
                     gpr-ts-mode-case-formatting)))
-        (gpr-ts-mode--case-format-word
+        (gpr-ts-case--format-word
          node-start
          node-end
          (plist-get (cdr entry) :formatter)
@@ -189,7 +190,7 @@ the DICTIONARY takes precedence over the FORMATTER."
 
 ;;; Case Category Predicates
 
-(cl-defgeneric gpr-ts-mode-case-category-p
+(cl-defgeneric gpr-ts-case-category-p
     (category _node &optional _last-input _pos)
   "Return non-nil if NODE is a member of CATEGORY.
 
@@ -198,21 +199,15 @@ the buffer.  POS represents the buffer location where LAST-INPUT will be
 inserted."
   (error "Unknown case category: %s" category))
 
-(defvar gpr-ts-mode--keyword-qualifier-regex)
-(defvar gpr-ts-mode--keyword-qualifier-project-regex)
+(defconst gpr-ts-case--keyword-qualifier-regex
+  (let* ((qualifiers '("aggregate" "configuration" "library" "standard")))
+    (rx-to-string `(: bos (or ,@gpr-ts-mode--keywords ,@qualifiers) eos))))
 
-(with-eval-after-load 'gpr-ts-mode
-  (defvar gpr-ts-mode--keywords nil)
+(defconst gpr-ts-case--keyword-qualifier-project-regex
+  (let* ((qualifiers '("aggregate" "configuration" "library" "standard")))
+    (rx-to-string `(: bos (or ,@gpr-ts-mode--keywords ,@qualifiers "project") eos))))
 
-  (setq gpr-ts-mode--keyword-qualifier-regex
-        (let* ((qualifiers '("aggregate" "configuration" "library" "standard")))
-          (rx-to-string `(: bos (or ,@gpr-ts-mode--keywords ,@qualifiers) eos))))
-
-  (setq gpr-ts-mode--keyword-qualifier-project-regex
-        (let* ((qualifiers '("aggregate" "configuration" "library" "standard")))
-          (rx-to-string `(: bos (or ,@gpr-ts-mode--keywords ,@qualifiers "project") eos)))))
-
-(cl-defmethod gpr-ts-mode-case-category-p
+(cl-defmethod gpr-ts-case-category-p
   ((_category (eql 'identifier)) node &optional last-input pos)
   "Return non-nil if NODE is a member of the \\='identifier\\=' CATEGORY.
 
@@ -235,7 +230,7 @@ inserted."
                 ;; Check if by inserting the separator, we will be
                 ;; creating a keyword.
                 (not (string-match-p
-                      gpr-ts-mode--keyword-qualifier-project-regex
+                      gpr-ts-case--keyword-qualifier-project-regex
                       (downcase
                        (buffer-substring-no-properties
                         (treesit-node-start node)
@@ -261,11 +256,11 @@ inserted."
                        (or (string-equal prev-type "for")
                            (string-equal prev-type "'"))))))
        ;; Keyword becoming an identifier
-       (and (string-match-p gpr-ts-mode--keyword-qualifier-project-regex type)
+       (and (string-match-p gpr-ts-case--keyword-qualifier-project-regex type)
             (or (eq last-input ?_)
                 (eq last-input ?')))))))
 
-(cl-defmethod gpr-ts-mode-case-category-p
+(cl-defmethod gpr-ts-case-category-p
   ((_category (eql 'keyword)) node &optional last-input pos)
   "Return non-nil if NODE is a member of the \\='keyword\\=' CATEGORY.
 
@@ -274,7 +269,7 @@ the buffer.  POS represents the buffer location where LAST-INPUT will be
 inserted."
   (when-let* ((type (treesit-node-type node)))
     (if (null last-input)
-        (or (string-match gpr-ts-mode--keyword-qualifier-regex type)
+        (or (string-match gpr-ts-case--keyword-qualifier-regex type)
             ;; Don't consider "Project" prefix as keyword
             (and (string-equal type "project")
                  (when-let* ((next (treesit-node-next-sibling node))
@@ -282,7 +277,7 @@ inserted."
                    (not (string-equal next-type "'")))))
       (or
        ;; Keyword staying a keyword
-       (and (string-match-p gpr-ts-mode--keyword-qualifier-project-regex type)
+       (and (string-match-p gpr-ts-case--keyword-qualifier-project-regex type)
             (not (eq last-input ?_))
             (not (eq last-input ?')))
        ;; Identifier becoming a keyword
@@ -292,7 +287,7 @@ inserted."
             ;; Check if by inserting the separator, a keyword will be
             ;; created.
             (string-match-p
-             gpr-ts-mode--keyword-qualifier-project-regex
+             gpr-ts-case--keyword-qualifier-project-regex
              (downcase
               (buffer-substring-no-properties
                (treesit-node-start node)
@@ -319,7 +314,7 @@ inserted."
 
 ;;; Auto-Case Minor Mode
 
-(defun gpr-ts-mode--case-format-word-try (_)
+(defun gpr-ts-case--format-word-try (_)
   "Attempt to apply case formatting to word before point."
   (prog1
       nil ; return nil so overlaid keybinding triggers
@@ -336,14 +331,14 @@ inserted."
                 (entry
                  (seq-find
                   (lambda (entry)
-                    (gpr-ts-mode-case-category-p (car entry) node last-input (point)))
+                    (gpr-ts-case-category-p (car entry) node last-input (point)))
                   gpr-ts-mode-case-formatting)))
       ;; Point might be in the middle of a word and therefore about to
       ;; separate it into two words by the yet-to-be-inserted
       ;; key-press.  Only apply formatting before point.  The category
       ;; predicate already took this into consideration when
       ;; determining the category.
-      (gpr-ts-mode--case-format-word
+      (gpr-ts-case--format-word
        (treesit-node-start node)
        (min (point) (treesit-node-end node))
        (plist-get (cdr entry) :formatter)
@@ -354,7 +349,7 @@ inserted."
     (dolist (key '("RET" "SPC" "_" "&" "(" ")" "=" "|" ";" ":" "'" "\"" "," "." ">"))
       (define-key map (kbd key)
                   `(menu-item "" ignore
-                              :filter gpr-ts-mode--case-format-word-try)))
+                              :filter gpr-ts-case--format-word-try)))
     map))
 
 (define-minor-mode gpr-ts-auto-case-mode
@@ -363,6 +358,6 @@ inserted."
   :lighter " GPR/c"
   :interactive (gpr-ts-mode))
 
-(provide 'gpr-ts-casing)
+(provide 'gpr-ts-case)
 
-;;; gpr-ts-casing.el ends here
+;;; gpr-ts-case.el ends here

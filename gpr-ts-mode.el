@@ -34,7 +34,7 @@
 
 ;;; Code:
 
-(require 'gpr-ts-casing)
+(require 'gpr-ts-case)
 (require 'gpr-ts-completion)
 (require 'gpr-ts-core)
 (require 'gpr-ts-imenu)
