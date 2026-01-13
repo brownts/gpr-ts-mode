@@ -54,9 +54,28 @@ The following keywords are meaningful:
 
 :dictionary
 
-   VALUE must be a list of strings whose exact casing is applied to
-   words and subwords.  Dictionary entries take precedence over the
-   formatting function.  This is an optional property."
+   Dictionary entries take precedence over the formatting function.
+   This is an optional property.
+
+   VALUE may be a list of strings whose exact casing is applied to
+   candidate words and subwords.
+
+   VALUE may also be a property list, having the form:
+
+      [KEYWORD VALUE]...
+
+   The following keywords are meaningful:
+
+   :words
+
+      VALUE must be a list of strings whose exact casing is applied to
+      candidate words and subwords.  This is an optional property.
+
+   :files
+
+      VALUE must be a list of files where the content of each file
+      contains a word or subword per line whose exact casing is applied
+      to candidate words and subwords.  This is an optional property."
   :type '(alist
           :key-type (symbol :tag "Category")
           :value-type
@@ -73,10 +92,124 @@ The following keywords are meaningful:
               (function-item :tag "Lower-Case"          downcase)
               (function      :tag "Custom")))
             (:dictionary
-             (repeat :tag "Words" (string :tag "Word"))))))
+             (choice
+              :tag "Dictionary"
+              (repeat :tag "Words" (string :tag "Word"))
+              (plist
+               :tag "Words/Files"
+               :key-type symbol
+               :options
+               ((:words (repeat :tag "Words" (string :tag "Word")))
+                (:files (repeat :tag "Files" (file :tag "File"))))))))))
   :group 'gpr-ts
   :link '(custom-manual :tag "Casing" "(gpr-ts-mode)Casing")
   :package-version '(gpr-ts-mode . "0.7.0"))
+
+;;;###autoload
+(put 'gpr-ts-mode-case-formatting
+     'safe-local-variable
+     (lambda (rules)
+       (while (and (consp rules)
+                   (consp (car rules))
+                   (not (unsafep (list (plist-get (cdar rules) :formatter)))))
+         (setq rules (cdr rules)))
+       (null rules)))
+
+;;;; Dictionary Files
+
+(defvar gpr-ts-case--dictionary-file-alist nil)
+(defvar gpr-ts-case--formatting nil)
+
+(defun gpr-ts-case--dictionary-load (file)
+  "Load dictionary FILE."
+  (let (file-words)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (while (not (eobp))
+        (if (looking-at (rx bol (* whitespace) eol) 'inhibit-modify)
+            (forward-line 1) ; skip empty lines
+          (skip-chars-forward " \t")
+          (when-let* ((line-words
+                       (string-split
+                        (buffer-substring-no-properties (pos-bol) (pos-eol))
+                        (rx "*") 'omit-nulls (rx (+ whitespace)))))
+            (dolist (line-word line-words)
+              (unless (assoc-string line-word file-words t)
+                (push line-word file-words))))
+          (forward-line 1))))
+    (setq gpr-ts-case--dictionary-file-alist
+          (assoc-delete-all file gpr-ts-case--dictionary-file-alist))
+    (push (cons file `( :words ,(reverse file-words)
+                        :modification-time ,(file-attribute-modification-time
+                                             (file-attributes file))))
+          gpr-ts-case--dictionary-file-alist)))
+
+(defun gpr-ts-case--settings-process (symbol newval operation where)
+  "Load/Reload dictionary files as needed and compute internal word list.
+
+SYMBOL is expected to be `gpr-ts-mode-case-formatting', and OPERATION is
+queried to check that it is a `set' operation (as defined by
+`add-variable-watcher'), otherwise nothing is updated.  Either compute
+the default or buffer-local value for `gpr-ts-mode-case-formatting'
+based on NEWVAL for SYMBOL and any loaded/reloaded dictionaries."
+  (when (and (eq symbol 'gpr-ts-mode-case-formatting)
+             (eq operation 'set))
+    (let (rules)
+      (dolist (rule newval)
+        (let (words)
+          (when-let* ((dictionary (plist-get (cdr rule) :dictionary)))
+            (if-let* ((files (plist-get dictionary :files)))
+                (dolist (file files)
+                  (let* ((file-path (substitute-in-file-name file)))
+                    (if (file-name-absolute-p file-path)
+                        (setq file-path (expand-file-name file-path))
+                      (if-let* ((dir (locate-dominating-file (buffer-file-name) file-path)))
+                          (setq file-path (expand-file-name file-path dir))
+                        (setq file-path (expand-file-name file-path))))
+                    (if (or (not (stringp file-path))
+                            (not (file-readable-p file-path)))
+                        (message "Cannot read %s, skipping dictionary file." file)
+                      (let* ((dictionary-info
+                              (cdr (assoc-string
+                                    file-path
+                                    gpr-ts-case--dictionary-file-alist))))
+                        (when (or (not dictionary-info)
+                                  (not (equal
+                                        (plist-get dictionary-info :modification-time)
+                                        (file-attribute-modification-time
+                                         (file-attributes file-path)))))
+                          (gpr-ts-case--dictionary-load file-path))))
+                    (setq words
+                          (append words
+                                  (plist-get
+                                   (cdr (assoc-string
+                                         file-path
+                                         gpr-ts-case--dictionary-file-alist))
+                                   :words)
+                                  (plist-get dictionary :words)))))
+              (setq words (or (plist-get dictionary :words) dictionary))))
+          (let ((new-rule (list (car rule)
+                                :formatter (plist-get (cdr rule) :formatter))))
+            (when words
+              (setq new-rule
+                    (append new-rule (list :dictionary words))))
+            (push new-rule rules))))
+      (setq rules (reverse rules))
+      (if where
+          (with-current-buffer where
+            (setq-local gpr-ts-case--formatting rules))
+        (setq-default gpr-ts-case--formatting rules)))))
+
+(gpr-ts-case--settings-process
+ 'gpr-ts-mode-case-formatting
+ (default-value 'gpr-ts-mode-case-formatting)
+ 'set nil)
+
+(add-variable-watcher
+ 'gpr-ts-mode-case-formatting
+ #'gpr-ts-case--settings-process)
+
+;;;; Word Formatting
 
 (defun gpr-ts-case--format-word (beg end formatter &optional dictionary)
   "Apply case formatting to word bounded by BEG and END using FORMATTER.
@@ -151,7 +284,7 @@ the DICTIONARY takes precedence over the FORMATTER."
                    (seq-find
                     (lambda (entry)
                       (gpr-ts-case-category-p (car entry) node))
-                    gpr-ts-mode-case-formatting)))
+                    gpr-ts-case--formatting)))
         (gpr-ts-case--format-word
          node-start
          node-end
@@ -333,7 +466,7 @@ inserted."
                  (seq-find
                   (lambda (entry)
                     (gpr-ts-case-category-p (car entry) node last-input (point)))
-                  gpr-ts-mode-case-formatting)))
+                  gpr-ts-case--formatting)))
       ;; Point might be in the middle of a word and therefore about to
       ;; separate it into two words by the yet-to-be-inserted
       ;; key-press.  Only apply formatting before point.  The category
