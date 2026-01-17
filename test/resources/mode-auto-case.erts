@@ -1,0 +1,80 @@
+Name: Auto Case (keyword)
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (gpr-ts-auto-case-mode)
+        (gpr-ts-mode-tests--simulate-key-press "SPC"))
+
+Point-Char: |
+
+=-=
+PROJECT|
+=-=
+project |
+=-=-=
+
+Name: Auto Case (identifier)
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (gpr-ts-auto-case-mode)
+        (gpr-ts-mode-tests--simulate-key-press "_"))
+
+Point-Char: |
+
+=-=
+project hello|
+=-=
+project Hello_|
+=-=-=
+
+Name: Auto Case (project identifier)
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (gpr-ts-auto-case-mode)
+        (gpr-ts-mode-tests--simulate-key-press "'"))
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   for Source_Dirs use project|
+=-=
+project Hello_World is
+   for Source_Dirs use Project'|
+=-=-=
+
+Name: Auto Case (identifier becoming keyword)
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (gpr-ts-auto-case-mode)
+        (gpr-ts-mode-tests--simulate-key-press "SPC"))
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   FOR|Source_Dirs
+=-=
+project Hello_World is
+   for |Source_Dirs
+=-=-=
+
+Name: Auto Case (keyword becoming identifier)
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (gpr-ts-auto-case-mode)
+        (gpr-ts-mode-tests--simulate-key-press "_"))
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   for|
+=-=
+project Hello_World is
+   For_|
+=-=-=
