@@ -82,6 +82,97 @@ standard project Hello_World is
 end Hello_World;
 =-=-=
 
+Code: (lambda ()
+        (default-transform)
+        (setq-local gpr-ts-mode-case-formatting
+                    '((identifier :formatter capitalize :dictionary (:words ("cOmPiLeR" "WOrLD")))
+                      (keyword    :formatter downcase)))
+        (gpr-ts-mode-case-format-buffer))
+
+Point-Char: |
+
+Name: Buffer Formatting (dictionary word list)
+
+=-=
+STANDARD PROJECT HELLO_WORLD IS
+   FOR MAIN USE ("hello_world");
+
+   TYPE BUILD_TYPE IS ("Debug", "Release");
+   BUILD : BUILD_TYPE := EXTERNAL ("BUILD", "Debug");
+
+   PACKAGE COMPILER IS|
+      CASE BUILD IS
+         WHEN "Debug" =>
+            FOR DEFAULT_SWITCHES ("Ada") use ("-g", "-O0");
+         WHEN "Release" =>
+            NULL;
+      END CASE;
+   END COMPILER;
+END HELLO_WORLD;
+=-=
+standard project Hello_WOrLD is
+   for Main use ("hello_world");
+
+   type Build_Type is ("Debug", "Release");
+   Build : Build_Type := external ("BUILD", "Debug");
+
+   package cOmPiLeR is|
+      case Build is
+         when "Debug" =>
+            for Default_Switches ("Ada") use ("-g", "-O0");
+         when "Release" =>
+            null;
+      end case;
+   end cOmPiLeR;
+end Hello_WOrLD;
+=-=-=
+
+Code: (lambda ()
+        (default-transform)
+        (with-dictionary-file '("cOmPiLeR" "bUILd")
+          (setq-local gpr-ts-mode-case-formatting
+                      `((identifier :formatter capitalize :dictionary (:files (,dict-file-name)))
+                        (keyword    :formatter downcase))))
+        (gpr-ts-mode-case-format-buffer))
+
+Point-Char: |
+
+Name: Buffer Formatting (dictionary file)
+
+=-=
+STANDARD PROJECT HELLO_WORLD IS
+   FOR MAIN USE ("hello_world");
+
+   TYPE BUILD_TYPE IS ("Debug", "Release");
+   BUILD : BUILD_TYPE := EXTERNAL ("BUILD", "Debug");
+
+   PACKAGE COMPILER IS|
+      CASE BUILD IS
+         WHEN "Debug" =>
+            FOR DEFAULT_SWITCHES ("Ada") use ("-g", "-O0");
+         WHEN "Release" =>
+            NULL;
+      END CASE;
+   END COMPILER;
+END HELLO_WORLD;
+=-=
+standard project Hello_World is
+   for Main use ("hello_world");
+
+   type bUILd_Type is ("Debug", "Release");
+   bUILd : bUILd_Type := external ("BUILD", "Debug");
+
+   package cOmPiLeR is|
+      case bUILd is
+         when "Debug" =>
+            for Default_Switches ("Ada") use ("-g", "-O0");
+         when "Release" =>
+            null;
+      end case;
+   end cOmPiLeR;
+end Hello_World;
+=-=-=
+
 Code: (lambda () (default-transform) (gpr-ts-mode-case-format-region 165 339))
 
 Name: Region Formatting

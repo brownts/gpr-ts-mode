@@ -78,3 +78,44 @@ project Hello_World is
 project Hello_World is
    For_|
 =-=-=
+
+Name: Auto Case (dictionary word list)
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (setq-local gpr-ts-mode-case-formatting
+                    '((identifier :formatter capitalize :dictionary (:words ("cOmPiLeR")))
+                      (keyword    :formatter downcase)))
+        (gpr-ts-auto-case-mode)
+        (gpr-ts-mode-tests--simulate-key-press "SPC"))
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   package compiler|
+=-=
+project Hello_World is
+   package cOmPiLeR |
+=-=-=
+
+Name: Auto Case (dictionary file)
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (with-dictionary-file "cOmPiLeR"
+          (setq-local gpr-ts-mode-case-formatting
+                      `((identifier :formatter capitalize :dictionary (:files (,dict-file-name)))
+                        (keyword    :formatter downcase))))
+        (gpr-ts-auto-case-mode)
+        (gpr-ts-mode-tests--simulate-key-press "SPC"))
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   package compiler|
+=-=
+project Hello_World is
+   package cOmPiLeR |
+=-=-=
