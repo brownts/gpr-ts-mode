@@ -1,0 +1,49 @@
+;; When a buffer region is active, a long standing bug in the Emacs
+;; `align' package can cause a buffer region which spans multiple alignment
+;; sections to not be aligned properly.  This is encountered in versions
+;; of Emacs prior to Emacs 31.  This bug does not manifest if only aligning
+;; the current (or a single) alignment section.  Emacs Bug#80316.
+
+Code: (lambda ()
+        (when (< emacs-major-version 31)
+          (setf (ert-test-expected-result-type (ert-running-test)) :failed))
+        (default-transform)
+        (transient-mark-mode +1)
+        (let ((inhibit-message t))
+          (mark-whole-buffer))
+        (should (use-region-p))
+        (gpr-ts-mode-tests--simulate-key-press "C-c C-a"))
+
+Name: Align Multiple Sections
+
+=-=
+project Hello_World is
+   for Languages use ("Ada");
+   for Source_Dirs use (Project'Project_Dir); -- List of dirs
+   for Object_Dir USE "obj";
+   for Create_Missing_Dirs uSe "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext := ".out";
+
+   A := "Some text"; -- A comment
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+=-=
+project Hello_World is
+   for Languages           use ("Ada");
+   for Source_Dirs         use (Project'Project_Dir); -- List of dirs
+   for Object_Dir          USE "obj";
+   for Create_Missing_Dirs uSe "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext                   := ".out";
+
+   A               := "Some text"; -- A comment
+   B               := "Some additional text";
+   C : Yes_No_Type := "No";        -- Another comment
+end Hello_World;
+=-=-=

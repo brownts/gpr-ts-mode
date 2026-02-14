@@ -34,6 +34,7 @@
 
 ;;; Code:
 
+(require 'gpr-ts-align)
 (require 'gpr-ts-case)
 (require 'gpr-ts-completion)
 (require 'gpr-ts-core)
@@ -97,6 +98,13 @@ specified.  See `treesit-language-source-alist' for full details."
   :package-version '(gpr-ts-mode . "0.6.0"))
 ;;;###autoload(put 'gpr-ts-mode-package-names 'safe-local-variable #'list-of-strings-p)
 
+(defcustom gpr-ts-mode-keymap-prefix "C-c"
+  "Keymap prefix for `gpr-ts-mode'."
+  :type 'string
+  :group 'gpr-ts
+  :link '(custom-manual :tag "Miscellaneous" "(gpr-ts-mode)Miscellaneous")
+  :package-version '(gpr-ts-mode . "0.8.0"))
+
 (defvar gpr-ts-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?-  ". 12" table)
@@ -109,16 +117,6 @@ specified.  See `treesit-language-source-alist' for full details."
     (modify-syntax-entry ?\n ">"    table)
     table)
   "Syntax table for `gpr-ts-mode'.")
-
-(defun gpr-ts-mode--project-keyword-p (node)
-  "Check if NODE is a project keyword."
-  (when-let* ((node-t (treesit-node-type node))
-              ((string-equal node-t "project")))
-    (let* ((prev-node (gpr-ts-mode--prev-node node))
-           (prev-node-t (treesit-node-type prev-node)))
-      (or (null prev-node)
-          (member prev-node-t '("with_declaration"
-                                "project_qualifier"))))))
 
 (defun gpr-ts-mode--package-declaration-name-p (node)
   "Check if NODE is a package_declaration name."
@@ -309,6 +307,11 @@ must be the last segment of the name."
                  "<remap> <prog-fill-reindent-defun>"
                "M-q")))
     (keymap-set map key #'gpr-ts-mode-fill-reindent-defun)
+    (when gpr-ts-mode-keymap-prefix
+      (keymap-set map
+                  gpr-ts-mode-keymap-prefix
+                  (define-keymap
+                    "C-a" #'gpr-ts-mode-align)))
     map)
   "Keymap for `gpr-ts-mode'.")
 
@@ -332,6 +335,9 @@ must be the last segment of the name."
     ["Toggle Auto-Casing"             gpr-ts-auto-case-mode                   t]
     ["Case Format Buffer"             gpr-ts-mode-case-format-buffer          t]
     ["Case Format Point/Region"       gpr-ts-mode-case-format-dwim            t]
+    "-----"
+    ["Toggle Auto-Alignment"          gpr-ts-auto-align-mode                  t]
+    ["Align Region / Section"         gpr-ts-mode-align                       t]
     "-----"
     ["Re-Indent Defun / Fill Comment" gpr-ts-mode-fill-reindent-defun         t]
     ["Re-Indent Buffer"               gpr-ts-mode-reindent-buffer             t]
@@ -427,6 +433,9 @@ must be the last segment of the name."
   ;; Completion.
   (add-hook 'completion-at-point-functions #'gpr-ts-mode--completion-at-point nil t)
 
+  ;; Align.
+  (gpr-ts-align--setup)
+
   (treesit-major-mode-setup)
   (run-hooks 'gpr-ts-mode--after-setup-hook))
 
@@ -455,8 +464,22 @@ must be the last segment of the name."
    :topic 'symbol
    :mode '(emacs-lisp-mode . "gpr")
    :regexp "\\bgpr-ts-[^][()`'‘’,\" \t\n]+"
-   :doc-spec '(("(gpr-ts-mode)Command Index" nil "^ -+ .*: " "\\( \\|$\\)")
-               ("(gpr-ts-mode)Variable Index" nil "^ -+ .*: " "\\( \\|$\\)"))))
+   :doc-spec `(("(gpr-ts-mode)Command Index"
+                nil
+                ;; Prefix for command documentation in Info
+                ,(rx (or
+                      ;; Prefix for command without key binding
+                      (seq bol space (+ "-") space (+ anychar) space)
+                      ;; Prefix for command with key binding
+                      (seq bol "‘" (+ anychar) "’" space "(‘")))
+                ;; Suffix for command documentation in Info
+                ,(rx (? "’)") (or space eol)))
+               ("(gpr-ts-mode)Variable Index"
+                nil
+                ;; Prefix for variable documentation in Info
+                ,(rx bol space (+ "-") space (+ anychar) ":" space)
+                ;; Suffix for variable documentation in Info
+                ,(rx (or space eol))))))
 
 (provide 'gpr-ts-mode)
 

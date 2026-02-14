@@ -1,0 +1,229 @@
+Code: (lambda ()
+        (default-transform)
+        (gpr-ts-mode-tests--simulate-key-press "C-c C-a"))
+
+Name: Align Current Section (attribute_declaration)
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   for Languages use("Ada");|
+   for Source_Dirs use(Project'Project_Dir); -- List of dirs
+   for Object_Dir USE"obj";
+   for Create_Missing_Dirs uSe"True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext := ".out";
+
+   A := "Some text"; -- A comment
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+=-=
+project Hello_World is
+   for Languages           use ("Ada");
+   for Source_Dirs         use (Project'Project_Dir); -- List of dirs
+   for Object_Dir          USE "obj";
+   for Create_Missing_Dirs uSe "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext := ".out";
+
+   A := "Some text"; -- A comment
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+=-=-=
+
+Name: Align Current Section (variable_declaration)
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   for Languages use ("Ada");
+   for Source_Dirs use (Project'Project_Dir); -- List of dirs
+   for Object_Dir USE "obj";
+   for Create_Missing_Dirs uSe "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled :Yes_No_Type :=external("ENABLED", "Yes");
+   Ext :=".out";|
+
+   A := "Some text"; -- A comment
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+=-=
+project Hello_World is
+   for Languages use ("Ada");
+   for Source_Dirs use (Project'Project_Dir); -- List of dirs
+   for Object_Dir USE "obj";
+   for Create_Missing_Dirs uSe "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext                   := ".out";
+
+   A := "Some text"; -- A comment
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+=-=-=
+
+Name: Align Current Section (Trailing Comment)
+
+Point-Char: |
+
+=-=
+project Hello_World is
+   for Languages use ("Ada");
+   for Source_Dirs use (Project'Project_Dir); -- List of dirs
+   for Object_Dir USE "obj";
+   for Create_Missing_Dirs uSe "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext := ".out";
+
+   A := "Some text"; -- A comment|
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+=-=
+project Hello_World is
+   for Languages use ("Ada");
+   for Source_Dirs use (Project'Project_Dir); -- List of dirs
+   for Object_Dir USE "obj";
+   for Create_Missing_Dirs uSe "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext := ".out";
+
+   A               := "Some text"; -- A comment
+   B               := "Some additional text";
+   C : Yes_No_Type := "No";        -- Another comment
+end Hello_World;
+=-=-=
+
+Name: attribute_declaration (broken line after "use")
+
+Point-Char: |
+
+=-=
+project Test is
+   for Languages use ("Ada");|
+   for Source_Dirs use
+     (Project'Project_Dir);
+end Test;
+=-=
+project Test is
+   for Languages   use ("Ada");
+   for Source_Dirs use
+     (Project'Project_Dir);
+end Test;
+=-=-=
+
+Name: variable_declaration (Variable name containing "use" not aligned)
+
+Point-Char: |
+
+=-=
+project Test is
+   for Languages use ("Ada");|
+   Foo_use_Bar := "Test";
+end Test;
+=-=
+project Test is
+   for Languages use ("Ada");
+   Foo_use_Bar := "Test";
+end Test;
+=-=-=
+
+Name: variable_declaration (broken line after colon)
+
+Point-Char: |
+
+=-=
+project Test is
+   Data : My_Type := "blah";|
+   Z :
+     My_Type := "blah";
+end Test;
+=-=
+project Test is
+   Data : My_Type := "blah";
+   Z    :
+     My_Type      := "blah";
+end Test;
+=-=-=
+
+Name: variable_declaration (broken line after assignment)
+
+Point-Char: |
+
+=-=
+project Test is
+   Data : My_Type := "blah";|
+   Z : My_Type :=
+     "blah";
+end Test;
+=-=
+project Test is
+   Data : My_Type := "blah";
+   Z    : My_Type :=
+     "blah";
+end Test;
+=-=-=
+
+Name: Don't Align (or Consider Separators) Keywords in Strings or Comments
+
+Point-Char: |
+
+=-=
+project Test is
+   for Source_Dirs use (Project'Project_Dir);|
+   X := "use"; -- use
+   for Create_Missing_Dirs use"True";
+   Foo := "case"; -- package
+end Test;
+=-=
+project Test is
+   for Source_Dirs         use (Project'Project_Dir);
+   X   := "use";  -- use
+   for Create_Missing_Dirs use "True";
+   Foo := "case"; -- package
+end Test;
+=-=-=
+
+Code: (lambda ()
+        (default-transform)
+        (transient-mark-mode +1)
+        (let ((inhibit-message t))
+          (mark-whole-buffer))
+        (should (use-region-p))
+        (gpr-ts-mode-tests--simulate-key-press "C-u C-c C-a"))
+
+Name: Align Buffer as Single Alignment Section
+
+=-=
+project Test is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";
+
+   for Source_Dirs use (Project'Project_Dir);
+   for Object_Dir use "obj";
+end Test;
+=-=
+project Test is
+   for Languages           use ("Ada");
+   for Create_Missing_Dirs use "True";
+
+   for Source_Dirs         use (Project'Project_Dir);
+   for Object_Dir          use "obj";
+end Test;
+=-=-=

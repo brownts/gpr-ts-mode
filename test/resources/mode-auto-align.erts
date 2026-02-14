@@ -1,0 +1,42 @@
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (gpr-ts-auto-align-mode)
+        (gpr-ts-mode-tests--simulate-key-press "RET")
+        (ert-run-idle-timers))
+
+Name: Auto Align
+
+Point-Char: |
+
+=-=
+project Test is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";|
+=-=
+project Test is
+   for Languages           use ("Ada");
+   for Create_Missing_Dirs use "True";
+   |
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (gpr-ts-auto-align-mode)
+        (setq-local align-indent-before-aligning t)
+        (gpr-ts-mode-tests--simulate-key-press "RET")
+        (ert-run-idle-timers))
+
+Name: Auto Align (Indent Before Align)
+
+Point-Char: |
+
+=-=
+project Test is
+for Languages use ("Ada");
+for Create_Missing_Dirs use "True";|
+=-=
+project Test is
+   for Languages           use ("Ada");
+   for Create_Missing_Dirs use "True";
+   |
+=-=-=

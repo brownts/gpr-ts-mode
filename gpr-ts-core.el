@@ -128,6 +128,13 @@ START is either a node or a position."
     (treesit-node-at
      (1- (treesit-node-end prev-node)))))
 
+(defun gpr-ts-mode--next-leaf-node (start)
+  "Find leaf node after START.
+
+START is either a node or a position."
+  (when-let* ((next-node (gpr-ts-mode--next-node start)))
+    (treesit-node-at (treesit-node-start next-node))))
+
 (defun gpr-ts-mode--matching-prev-node (start matches)
   "Find a node before START where node type is contained in MATCHES.
 
@@ -243,6 +250,16 @@ Return non-nil to indicate it is."
           (endname (treesit-node-child-by-field-name node "endname")))
       (string-equal-ignore-case (treesit-node-text name t)
                                 (treesit-node-text endname t)))))
+
+(defun gpr-ts-mode--project-keyword-p (node)
+  "Check if NODE is a project keyword."
+  (when-let* ((node-t (treesit-node-type node))
+              ((string-equal node-t "project")))
+    (let* ((prev-node (gpr-ts-mode--prev-node node))
+           (prev-node-t (treesit-node-type prev-node)))
+      (or (null prev-node)
+          (member prev-node-t '("with_declaration"
+                                "project_qualifier"))))))
 
 ;;; Node Name Utilities
 

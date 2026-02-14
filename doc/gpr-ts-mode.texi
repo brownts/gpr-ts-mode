@@ -31,7 +31,7 @@ methods (e.g., regular expressions).
 This major mode provides support for syntax highlighting, indentation,
 navigation, Imenu, ``which function'' (i.e., displaying the current
 function name in the mode line), outlining (via @samp{outline-minor-mode}),
-casing and completion.
+casing, completion and code alignment.
 
 @strong{Note}: This major mode is based on the Emacs 29 (or newer) built-in
 tree-sitter support, not to be confused with the separate Emacs
@@ -49,10 +49,12 @@ required for @samp{outline-minor-mode} to work with @samp{gpr-ts-mode}.
 * Grammar Installation::
 * Syntax Highlighting::
 * Indentation::
+* Code Alignment::
 * Navigation::
 * Imenu::
 * Casing::
 * Completion::
+* Miscellaneous::
 * Troubleshooting::
 * Example Configuration::
 * Resources::
@@ -67,6 +69,11 @@ Installation
 
 * From the MELPA Package Archive::
 * From the Git Repository::
+
+Code Alignment
+
+* Automatic Code Alignment::
+* Code Alignment Example::
 
 Troubleshooting
 
@@ -369,6 +376,180 @@ restriction will be lifted during the command so the entire buffer
 is re-indented, as opposed to only the narrowed region.
 @end deffn
 
+@node Code Alignment
+@chapter Code Alignment
+
+While related to indentation, code alignment is strictly different
+than indentation.  Indentation deals with the adjustment at the
+beginning of a line to reflect the code structure.  Code alignment
+deals with adjusting the inner parts of a line in conjunction with
+neighboring lines to align certain aspects within those lines.  So,
+while strictly separate concepts, code indentation can be triggered
+prior to code alignment, depending on the user option
+@code{align-indent-before-aligning}.  The alignment family of commands
+(@code{align}, @code{align-current}, etc.) are part of Emacs whose details can be
+found in the @uref{https://www.gnu.org/software/emacs/manual/html_node/emacs/Code-Alignment.html, Emacs Manual}.
+
+Provided by @code{gpr-ts-mode} are a set of alignment rules to handle
+alignment of variable declarations, attribute declarations and
+trailing comments.  For a variable declaration ``:'' and ``:='' are
+considered alignment points.  For attribute declarations, the @code{use}
+keyword is considered an alignment point.  The start of a trailing
+comment is also considered an alignment point.  The alignment rules
+are used to adjust the space padding before (and possibly after) these
+alignment points in order to vertically align them with neighboring
+lines.
+
+Alignment rules are applied consistently within an alignment section,
+whose bounds are defined by a boundary condition.  The boundary
+condition is provided by @code{gpr-ts-mode} such that alignment sections do
+not cross specific syntactical structures, such as package and project
+boundaries.  Sections are also bound by empty lines, so an alignment
+section does not cross an empty line.  Neighboring lines within the
+alignment section which contain the same alignment points will have
+those points vertically aligned.  For example, an ``:='' token will be
+aligned to the same column for all neighboring variable declarations
+within the same alignment section.  Lines which belong to a different
+alignment section may have different alignment columns, depending on
+the content of those lines.
+
+@table @asis
+@item @kbd{C-c C-a} (@code{gpr-ts-mode-align})
+@kindex C-c C-a
+@findex gpr-ts-mode-align
+Aligns sections within region if a region is active, otherwise
+aligns section containing point.  This command provides a wrapper
+over the @code{align} and @code{align-current} Emacs commands providing a DWIM
+interface.  When prefixed with @code{C-u} and a region is active, the
+region is aligned as a single alignment section (i.e., using
+@code{align-entire}).
+@end table
+
+When a buffer region is active, a long standing bug in the Emacs @code{align}
+package can cause a buffer region which spans multiple alignment
+sections to not be aligned properly.  You may encounter this behavior
+in versions of Emacs prior to Emacs 31.  This bug does not manifest if
+only aligning the current (or a single) alignment section.  For more
+details, refer to @uref{https://debbugs.gnu.org/80316, Emacs Bug #80316}.
+
+The rules, as previously described, can be customized.  The previous
+description only details the default set of rules, but they can be
+modified by the user if they prove insufficient.  The following set of
+user options allow full customization for @code{gpr-ts-mode}.
+
+@defopt gpr-ts-mode-align-region-separate
+Specifies how an alignment section separator is determined when one
+is not specified for an individual alignment or exclusion rule.  The
+format of this user option follows that of @code{align-region-separate}.
+Refer to the documentation for @code{align-region-separate} to gain a full
+understanding of how this user option behaves.  The option is used
+to set the buffer-local value of @code{align-region-separate}, when
+non-nil, otherwise the global value of @code{align-region-separate} is used
+for section separator determination, when not explicitly overridden
+within a rule.
+@end defopt
+
+@defopt gpr-ts-mode-align-rules
+Specifies the set of rules containing alignment points.  The rules
+should be ordered based on how they should be applied (alignment
+points further to the left within a line should be listed before
+those further to the right).  For example, trailing comments should
+be listed last.  The format of this user option follows that of
+@code{align-rules-list}.  Refer to the documentation for @code{align-rules-list}
+to gain a full understanding of how this user option behaves.  The
+option is used to set the buffer-local value of
+@code{align-mode-rules-list}.
+@end defopt
+
+@defopt gpr-ts-mode-align-exclude-rules
+Specifies the set of exclusion rules.  When a rule match is found,
+the exclusion rules are consulted.  When a matched rule overlaps an
+exclusion rule, the matched rule is not applied.  The format of this
+user option follows that of @code{align-exclude-rules-list}.  Refer to the
+documentation for @code{align-exclude-rules-list} to gain a full
+understanding of how this user option behaves.  The option is used
+to set the buffer-local value of @code{align-mode-exclude-rules-list}.
+@end defopt
+
+@menu
+* Automatic Code Alignment::
+* Code Alignment Example::
+@end menu
+
+@node Automatic Code Alignment
+@section Automatic Code Alignment
+
+For those who prefer a more automated approach, as opposed to manually
+executing the alignment command, a minor mode is provided to
+automatically perform code alignment on the current section.  The
+minor mode can be toggled via @code{M-x gpr-ts-auto-align-mode}, although
+consider adding the command to the major mode's hook to enable it
+whenever the major mode is active.  When the minor mode is active,
+automatic alignment is triggered when @code{RET} is pressed, however there is
+a user option for customizing the set of keys which trigger alignment.
+
+@deffn Command gpr-ts-auto-align-mode
+A minor mode which applies code alignment as you type.
+@end deffn
+
+@defopt gpr-ts-mode-auto-align-keys
+The list of keys which trigger automatic alignment.  By default this
+list only contains @code{RET}.  For a more aggressive alignment experience,
+consider adding @code{SPC} to this list.
+@end defopt
+
+@node Code Alignment Example
+@section Code Alignment Example
+
+As an example, consider the following buffer where there are multiple
+alignment sections, three to be precise, assuming the default
+alignment rules.  The reason there are three is because there are
+boundaries consisting of @code{is} and @code{end} keywords as well as empty lines.
+
+@example
+project Hello_World is
+   for Languages use ("Ada");
+   for Source_Dirs use ("."); -- List of dirs
+   for Object_Dir use "obj";
+   for Create_Missing_Dirs use "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext := ".out";
+
+   A := "Some text"; -- A comment
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+@end example
+
+The first section consists of the set of lines containing attribute
+declarations.  The second section consists of the variable
+declarations for @code{Enabled} and @code{Ext}.  The third section consists of the
+variable declarations @code{A}, @code{B} and @code{C}.
+
+Assuming point is on the ``Languages'' attribute name, pressing @code{C-c C-a}
+(i.e., the default key-binding for @code{gpr-ts-mode-align}), re-aligns the
+current section, which consists of the set of attribute declarations.
+The following is the state of the buffer after executing the command.
+
+@example
+project Hello_World is
+   for Languages           use ("Ada");
+   for Source_Dirs         use ("."); -- List of dirs
+   for Object_Dir          use "obj";
+   for Create_Missing_Dirs use "True";
+
+   type Yes_No_Type is ("Yes", "No");
+   Enabled : Yes_No_Type := external("ENABLED", "Yes");
+   Ext := ".out";
+
+   A := "Some text"; -- A comment
+   B := "Some additional text";
+   C : Yes_No_Type := "No"; -- Another comment
+end Hello_World;
+@end example
+
 @node Navigation
 @chapter Navigation
 
@@ -529,6 +710,19 @@ order to create a category, a new category symbol should be added to
 @samp{gpr-ts-mode-completion-at-point} should be created, specializing on the
 new category symbol name.  Refer to existing instances of this
 function to understand how current category functions are implemented.
+
+@node Miscellaneous
+@chapter Miscellaneous
+
+This section covers miscellaneous mode-specific commands and user
+options which don't fit elsewhere.
+
+@defopt gpr-ts-mode-keymap-prefix
+Prefix key used to activate the mode's @samp{keymap}.  This can be
+configured as desired to change the prefix while still preserving
+the rest of the mode map.  If the @samp{keymap} prefix is set to nil, then
+the mode commands won't be mapped at all.
+@end defopt
 
 @node Troubleshooting
 @chapter Troubleshooting
