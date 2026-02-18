@@ -449,12 +449,18 @@ inserted."
 ;;; Auto-Case Minor Mode
 
 (defun gpr-ts-case--format-word-try (_)
-  "Attempt to apply case formatting to word before point."
+  "Attempt to apply case formatting to word before point.
+
+This function returns nil to allow the underlying command associated
+with the key binding to be executed.  It is only used for side-effect
+purposes to case format the word before point.  Additionally, a check is
+performed to make sure the function is called from within the expected
+buffer and that `this-command' is nil in order to prevent key look-ups
+from triggering case formatting."
   (prog1
-      nil ; return nil so overlaid keybinding triggers
+      nil
     (when-let* ((last-input last-input-event)
-                ;; Prevent key lookups from outside the buffer from
-                ;; triggering case formatting
+                ((null this-command))
                 ((derived-mode-p 'gpr-ts-mode))
                 ((not (bobp)))
                 (prev-point (1- (point)))
