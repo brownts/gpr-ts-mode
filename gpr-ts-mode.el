@@ -36,8 +36,8 @@
 
 (require 'gpr-ts-align)
 (require 'gpr-ts-case)
+(require 'gpr-ts-common)
 (require 'gpr-ts-completion)
-(require 'gpr-ts-core)
 (require 'gpr-ts-imenu)
 (require 'gpr-ts-indent)
 (require 'cl-generic)

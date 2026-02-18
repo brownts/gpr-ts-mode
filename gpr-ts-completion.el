@@ -21,7 +21,7 @@
 
 ;;; Code:
 
-(require 'gpr-ts-core)
+(require 'gpr-ts-common)
 (require 'cl-generic)
 (eval-when-compile (require 'rx))
 (require 'treesit)

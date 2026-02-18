@@ -21,7 +21,7 @@
 
 ;;; Code:
 
-(require 'gpr-ts-core)
+(require 'gpr-ts-common)
 (require 'treesit)
 
 (defcustom gpr-ts-mode-imenu-categories

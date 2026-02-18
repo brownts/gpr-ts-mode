@@ -1,4 +1,4 @@
-;;; gpr-ts-core.el -- Core support for GPR Project files -*- lexical-binding: t; -*-
+;;; gpr-ts-common.el -- Common support for GPR Project files -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023-2026 Troy Brown
 
@@ -351,6 +351,6 @@ Return nil if NODE is not a defun node."
   (or (gpr-ts-mode--project-declaration-name node)
       (gpr-ts-mode--package-declaration-name node)))
 
-(provide 'gpr-ts-core)
+(provide 'gpr-ts-common)
 
-;;; gpr-ts-core.el ends here
+;;; gpr-ts-common.el ends here

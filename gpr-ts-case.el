@@ -22,7 +22,7 @@
 ;;; Code:
 
 (require 'cl-generic)
-(require 'gpr-ts-core)
+(require 'gpr-ts-common)
 (require 'rx)
 (require 'treesit)
 
