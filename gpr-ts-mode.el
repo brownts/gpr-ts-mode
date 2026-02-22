@@ -311,7 +311,8 @@ must be the last segment of the name."
       (keymap-set map
                   gpr-ts-mode-keymap-prefix
                   (define-keymap
-                    "C-a" #'gpr-ts-mode-align)))
+                    "C-a" #'gpr-ts-mode-align
+                    "C-]" #'gpr-ts-mode-close-block)))
     map)
   "Keymap for `gpr-ts-mode'.")
 
@@ -331,7 +332,7 @@ must be the last segment of the name."
 
 (easy-menu-define gpr-ts-mode-menu gpr-ts-mode-map
   "Menu keymap for `gpr-ts-mode'."
-  '("GNAT Project"
+  `("GNAT Project"
     ["Toggle Auto-Casing"             gpr-ts-auto-case-mode                   t]
     ["Case Format Buffer"             gpr-ts-mode-case-format-buffer          t]
     ["Case Format Point/Region"       gpr-ts-mode-case-format-dwim            t]
@@ -341,6 +342,12 @@ must be the last segment of the name."
     "-----"
     ["Re-Indent Defun / Fill Comment" gpr-ts-mode-fill-reindent-defun         t]
     ["Re-Indent Buffer"               gpr-ts-mode-reindent-buffer             t]
+    "-----"
+    ["Completion At Point"            completion-at-point
+     :keys ,(when-let* ((key (where-is-internal 'completion-at-point nil 'first-only)))
+              (key-description key))
+     :active t]
+    ["Close Block"                    gpr-ts-mode-close-block                 t]
     "-----"
     ["Beginning of Defun"             treesit-beginning-of-defun              t]
     ["End of Defun"                   treesit-end-of-defun                    t]

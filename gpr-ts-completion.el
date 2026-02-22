@@ -782,6 +782,69 @@ ATTRIBUTE-NAME."
        :company-kind (lambda (_) (plist-get match-info :kind))
        :exclusive 'no))))
 
+;;;; Completion Commands
+
+(defconst gpr-ts-completion--close-block-alist
+  `(("case"
+     :parent "case_construction"
+     :constructor "end case;")
+    ("package"
+     :parent "package_declaration"
+     :parent-predicate
+     ,(lambda (parent)
+        (not (gpr-ts-mode--package-declaration-names-match-p parent)))
+     :constructor
+     ,(lambda (node)
+        (when-let* ((name
+                     (gpr-ts-mode--tree-text
+                      (gpr-ts-mode--next-node node))))
+          (format "end %s;" name))))
+    ("project"
+     :parent "project_declaration"
+     :constructor
+     ,(lambda (node)
+        (when-let* ((name
+                     (gpr-ts-mode--tree-text
+                      (gpr-ts-mode--next-node node)
+                      '("comment"))))
+          (format "end %s;" name))))))
+
+(defun gpr-ts-mode-close-block ()
+  "Close the closest surrounding block."
+  (interactive)
+  (when-let* ((prev-node (gpr-ts-mode--prev-node (point)))
+              (node (gpr-ts-mode--matching-prev-node
+                     prev-node
+                     (mapcar #'car gpr-ts-completion--close-block-alist)))
+              (node-t (treesit-node-type node))
+              (parent-node (treesit-node-parent node))
+              (parent-node-t (treesit-node-type parent-node))
+              (close-info (cdr (assoc-string node-t gpr-ts-completion--close-block-alist)))
+              ((or (not (string-equal (plist-get close-info :parent) parent-node-t))
+                   (and (plist-get close-info :parent-predicate)
+                        (funcall (plist-get close-info :parent-predicate) parent-node))))
+              (constructor (plist-get close-info :constructor))
+              (closer
+               (cond ((stringp constructor) constructor)
+                     ((functionp constructor) (funcall constructor node))
+                     (t (error "Unknown constructor: %s" constructor)))))
+    ;; If there is already text on this line before point, insert a
+    ;; newline so block closer is inserted on the next line.
+    (unless (save-match-data
+              (looking-back (rx bol (* (syntax whitespace))) (pos-bol)))
+      ;; Set `this-command' to nil to trigger auto-alignment if enabled.
+      (let ((this-command nil))
+        (call-interactively (key-binding (kbd "RET")))))
+    (insert closer)
+    ;; If there is no trailing text after the inserted closer, just
+    ;; indent the line containing the closer and leave point at the
+    ;; end of the line.  Otherwise, move the trailing text to the next
+    ;; line keeping point at the beginning of that line, and indent
+    ;; both lines.
+    (if (looking-at-p (rx (* (syntax whitespace)) eol))
+        (indent-according-to-mode)
+      (reindent-then-newline-and-indent))))
+
 (provide 'gpr-ts-completion)
 
 ;;; gpr-ts-completion.el ends here

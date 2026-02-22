@@ -1,0 +1,219 @@
+Code: (lambda ()
+        (default-transform 'expect-error)
+        (gpr-ts-mode-tests--simulate-key-press "C-c C-]"))
+
+Name: Close Block (case_construction) 1
+
+Point-Char: |
+
+=-=
+project Test is
+   type Build_Type is ("Development", "Release");
+   Build : Build_Type := external ("BUILD", "Release");
+
+   package Compiler is
+      case Build is
+         when "Development" =>
+            for Default_Switches ("Ada") use ("-O0", "-g");
+         when "Release" =>
+            null;
+            |
+=-=
+project Test is
+   type Build_Type is ("Development", "Release");
+   Build : Build_Type := external ("BUILD", "Release");
+
+   package Compiler is
+      case Build is
+         when "Development" =>
+            for Default_Switches ("Ada") use ("-O0", "-g");
+         when "Release" =>
+            null;
+      end case;|
+=-=-=
+
+Name: Close Block (case_construction) 2
+
+Point-Char: |
+
+=-=
+project Test is
+   type Build_Type is ("Development", "Release");
+   Build : Build_Type := external ("BUILD", "Release");
+
+   package Compiler is
+      case Build is
+         when "Development" =>
+            for Default_Switches ("Ada") use ("-O0", "-g");
+         when "Release" =>
+            null;|
+=-=
+project Test is
+   type Build_Type is ("Development", "Release");
+   Build : Build_Type := external ("BUILD", "Release");
+
+   package Compiler is
+      case Build is
+         when "Development" =>
+            for Default_Switches ("Ada") use ("-O0", "-g");
+         when "Release" =>
+            null;
+      end case;|
+=-=-=
+
+Name: Close Block (package_declaration) 1
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+      |
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+   end Compiler;|
+=-=-=
+
+Name: Close Block (package_declaration) 2
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");|
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+   end Compiler;|
+=-=-=
+
+Name: Close Block (package_declaration) 3
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");|
+end Test;
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+   end Compiler;|
+end Test;
+=-=-=
+
+Name: Close Block (project_declaration) 1
+
+Point-Char: |
+
+=-=
+project Test is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";
+   |
+=-=
+project Test is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";
+end Test;|
+=-=-=
+
+Name: Close Block (project_declaraton) 2
+
+Point-Char: |
+
+=-=
+project Test is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+   end Compiler;|
+=-=
+project Test is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+   end Compiler;
+end Test;|
+=-=-=
+
+Name: Close Block (Name Casing)
+
+Point-Char: |
+
+=-=
+project TESt.me is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";
+   |
+=-=
+project TESt.me is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";
+end TESt.me;|
+=-=-=
+
+Name: Close Block (Trailing Text)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");| -- Trailing comment
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+   end Compiler;
+   |-- Trailing comment
+=-=-=
+
+Name: Close Block (Only Trailing Text)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+      |-- Comment
+=-=
+project Test is
+   package Compiler is
+      for Default_Switches ("Ada") use ("-O0", "-g");
+   end Compiler;
+   |-- Comment
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'expect-error)
+        (gpr-ts-auto-align-mode)
+        (gpr-ts-mode-tests--simulate-key-press "C-c C-]")
+        (ert-run-idle-timers))
+
+Name: Close Block (Auto-Alignment)
+
+Point-Char: |
+
+=-=
+project Test is
+   for Languages use ("Ada");
+   for Create_Missing_Dirs use "True";|
+=-=
+project Test is
+   for Languages           use ("Ada");
+   for Create_Missing_Dirs use "True";
+end Test;|
+=-=-=

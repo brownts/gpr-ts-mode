@@ -682,12 +682,13 @@ category functions are implemented.
 @node Completion
 @chapter Completion
 
-This major mode provides its own set of completions for GNAT Project
-buffers.  The completions are organized by completion categories
-(i.e., package name completion, attribute name completion, etc).
-Individual categories can be enabled or disabled as desired through
-customization.  Furthermore, the set of categories can be extended to
-provide categories not originally envisioned.
+This major mode provides its own set of @code{completion-at-point}
+completions for GNAT Project buffers.  The completions are organized
+by completion categories (i.e., package name completion, attribute
+name completion, etc).  Individual categories can be enabled or
+disabled as desired through customization.  Furthermore, the set of
+categories can be extended to provide categories not originally
+envisioned.
 
 @defopt gpr-ts-mode-completion-categories
 The set of categories to be used for completion.  Categories can be
@@ -710,6 +711,23 @@ order to create a category, a new category symbol should be added to
 @samp{gpr-ts-mode-completion-at-point} should be created, specializing on the
 new category symbol name.  Refer to existing instances of this
 function to understand how current category functions are implemented.
+
+In addition to traditional @code{completion-at-point} support, dedicated
+completion commands are provided to enhance productivity.
+
+@table @asis
+@item @kbd{C-c C-]} (@code{gpr-ts-mode-close-block})
+@kindex C-c C-]
+@findex gpr-ts-mode-close-block
+Completes the closing portion of an incomplete case construction,
+package declaration or project declaration (e.g., @code{end case;} for a
+case construction).  When point is on a non-blank line, the closing
+portion of the block will be placed on the next line.  The source
+will be re-indented if necessary.  If @code{gpr-ts-auto-align-mode} is
+enabled, auto-alignment may be triggered when point is on a
+non-blank line when the command is executed.  The command can be
+executed repeatedly to close nested blocks.
+@end table
 
 @node Miscellaneous
 @chapter Miscellaneous
