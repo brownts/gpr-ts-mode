@@ -1,0 +1,268 @@
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(1 8 nil nil mismatch) (gpr-ts-paren--show-paren-data))))
+
+Name: project_declaration (mismatch @ opener)
+
+Point-Char: |
+
+=-=
+|project
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal nil (gpr-ts-paren--show-paren-data))))
+
+Name: project_declaration (mismatch @ opener end, no face)
+
+Point-Char: |
+
+=-=
+project|
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(1 8 17 20) (gpr-ts-paren--show-paren-data))))
+
+Name: project_declaration (match @ opener)
+
+Point-Char: |
+
+=-=
+|project Test is
+end
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(17 20 1 8) (gpr-ts-paren--show-paren-data))))
+
+Name: project_declaration (match @ closer)
+
+Point-Char: |
+
+=-=
+project Test is
+end|
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal nil (gpr-ts-paren--show-paren-data))))
+
+Name: project_reference (no match)
+
+Point-Char: |
+
+=-=
+project Test is
+   for Object_Dir use |Project'Project_Dir;
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(20 27 nil nil mismatch) (gpr-ts-paren--show-paren-data))))
+
+Name: package_declaration (mismatch @ opener)
+
+Point-Char: |
+
+=-=
+project Test is
+   |package
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal nil (gpr-ts-paren--show-paren-data))))
+
+Name: package_declaration (mismatch @ opener end, no face)
+
+Point-Char: |
+
+=-=
+project Test is
+   package|
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(20 27 43 46) (gpr-ts-paren--show-paren-data))))
+
+Name: package_declaration (match @ opener)
+
+Point-Char: |
+
+=-=
+project Test is
+   |package Compiler is
+   end
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(43 46 20 27) (gpr-ts-paren--show-paren-data))))
+
+Name: package_declaration (match @ closer)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+   end|
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(46 50 nil nil mismatch) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (mismatch @ opener)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      |case
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (setq-local show-paren-when-point-in-periphery t)
+        (should (equal '(46 50 nil nil mismatch) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (mismatch @ opener periphery)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+|      case
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal nil (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (mismatch @ opener end, no face)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      case|
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(46 50 62 65) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (match @ opener)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      |case X is
+      end
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal '(62 65 46 50) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (match @ closer)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      case X is
+      end|
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (setq-local show-paren-when-point-inside-paren t)
+        (should (equal '(46 50 62 65) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (match @ opener inside paren)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      case| X is
+      end
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (setq-local show-paren-when-point-inside-paren t)
+        (should (equal '(62 65 46 50) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (match @ closer inside paren)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      case X is
+      |end
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (setq-local show-paren-when-point-in-periphery t)
+        (should (equal '(46 50 62 65) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (match @ opener periphery)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+|      case X is
+      end
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (setq-local show-paren-when-point-in-periphery t)
+        (should (equal '(62 65 46 50) (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (match @ closer periphery)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      case X is
+      end |
+=-=-=
+
+Code: (lambda ()
+        (default-transform 'dont-care)
+        (should (equal nil (gpr-ts-paren--show-paren-data))))
+
+Name: case_construction (no match @ opener keyword after end)
+
+Point-Char: |
+
+=-=
+project Test is
+   package Compiler is
+      case X is
+      end |case
+=-=-=

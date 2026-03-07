@@ -58,6 +58,21 @@
 
 ;;; Node Access
 
+(defun gpr-ts-mode--node-at (pos &optional or-ends-at)
+  "Return the leaf node at position POS, else nil.
+
+The returned node starts before or at POS and ends after POS.  The
+returned node may also end at POS if OR-ENDS-AT is non-nil.  Unlike
+`treesit-node-at', it never returns a node that starts after POS."
+  (when-let* ((node (treesit-node-at pos))
+              (node-s (treesit-node-start node))
+              (node-e (treesit-node-end node)))
+    (and (or (and (<= node-s pos)
+                  (> node-e pos))
+             (and or-ends-at
+                  (= node-e pos)))
+         node)))
+
 (defun gpr-ts-mode--prev-node (start &optional include-comments)
   "Find node before START, and possibly INCLUDE-COMMENTS.
 
@@ -260,6 +275,14 @@ Return non-nil to indicate it is."
       (or (null prev-node)
           (member prev-node-t '("with_declaration"
                                 "project_qualifier"))))))
+
+(defun gpr-ts-mode--matched-names-p (node)
+  "Determine if NODE names are mismatched."
+  (when-let* ((name-node (treesit-node-child-by-field-name node "name"))
+              (name (gpr-ts-mode--tree-text name-node '("comment")))
+              (endname-node (treesit-node-child-by-field-name node "endname"))
+              (endname (gpr-ts-mode--tree-text endname-node '("comment"))))
+    (string-equal-ignore-case name endname)))
 
 ;;; Node Name Utilities
 

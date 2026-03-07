@@ -40,6 +40,7 @@
 (require 'gpr-ts-completion)
 (require 'gpr-ts-imenu)
 (require 'gpr-ts-indent)
+(require 'gpr-ts-paren)
 (require 'cl-generic)
 (require 'lisp-mnt)
 (require 'treesit)
