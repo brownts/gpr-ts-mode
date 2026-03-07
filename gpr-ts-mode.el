@@ -406,6 +406,12 @@ must be the last segment of the name."
   (setq-local treesit-thing-settings
               `((gpr (sexp
                       (not ,(rx (or "(" ")" ","))))
+                     (list
+                      ,(rx (or "case_construction"
+                               "expression_list"
+                               "package_declaration"
+                               "project_declaration"
+                               "with_declaration")))
                      (sentence
                       ,(rx (or "attribute_declaration"
                                "case_construction"
