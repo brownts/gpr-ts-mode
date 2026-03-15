@@ -127,6 +127,88 @@ The delimiter must start at, end at, or contain position POS."
 
 (add-hook 'gpr-ts-mode--after-setup-hook #'gpr-ts-paren--show-paren-post-setup)
 
+;;;; `blink-matching-paren' support
+
+(defconst gpr-ts-paren--blink-matching-paren-closers '("end" ")"))
+
+(defun gpr-ts-paren--blink-matching-paren-data ()
+  "Determine matching opener, if one exists.
+
+Return nil if point is not on or immediately after a closer.  Otherwise,
+returns value compatible with `show-paren-data-function'."
+  (when-let* ((data
+               (let ((show-paren-when-point-in-periphery nil)
+                     (show-paren-when-point-inside-paren nil))
+                 (gpr-ts-paren--show-paren-data))))
+    (let* ((here-s (nth 0 data))
+           (here-e (nth 1 data))
+           (there-s (nth 2 data))
+           (mismatch (nth 4 data)))
+      (and (or (and (not mismatch)
+                    (< there-s here-s))
+               (and mismatch
+                    (let ((closer (buffer-substring-no-properties here-s here-e)))
+                      (member-ignore-case
+                       closer
+                       gpr-ts-paren--blink-matching-paren-closers))))
+           data))))
+
+(defun gpr-ts-paren--maybe-blink-matching-paren ()
+  "Blink the matching opener when applicable.
+
+This is expected to be placed on `post-command-hook'."
+  (when-let* (((not (null blink-matching-paren)))
+              ((not show-paren-mode))
+              ((eq this-command 'self-insert-command))
+              ((not executing-kbd-macro))
+              (data (gpr-ts-paren--blink-matching-paren-data)))
+    (let* ((opener-s (nth 2 data))
+           (opener-e (nth 3 data)))
+      (if opener-s
+          (cond ((or (eq blink-matching-paren 'jump-offscreen)
+                     (pos-visible-in-window-p opener-s))
+                 (and blink-matching-paren-on-screen
+                      (if (memq blink-matching-paren '(jump jump-offscreen))
+                          (save-excursion
+                            (goto-char opener-s)
+                            (sit-for blink-matching-delay))
+                        (unwind-protect
+                            (progn
+                              (move-overlay blink-matching--overlay
+                                            opener-s
+                                            opener-e
+                                            (current-buffer))
+                              (sit-for blink-matching-delay))
+                          (delete-overlay blink-matching--overlay)))))
+                (t
+                 (let* ((line (blink-paren-open-paren-line-string opener-s)))
+                   (minibuffer-message "%s%s"
+                                       (propertize "Matches " 'face 'shadow)
+                                       line))))
+        (message "No matching delimiter found")))))
+
+;;;; Parenthesis Setup
+
+(defun gpr-ts-paren--setup ()
+  "Setup parenthesis support for buffer."
+  ;; For `blink-matching-paren', don't trigger off of
+  ;; `blink-paren-post-self-insert-function', which by default is in
+  ;; the global `post-self-insert-hook', since that only matches
+  ;; close-parenthesis or paired delimiter characters based on the
+  ;; mode's syntax table, but doesn't handle block (i.e., keyword)
+  ;; delimiters.  It's disabled here by setting `blink-paren-function'
+  ;; to nil.
+  ;;
+  ;; Instead, the mode's own hook is added to `post-command-hook' with
+  ;; a high depth to ensure it is executed after other functionality
+  ;; that should occur first (e.g., electric indentation).  Because
+  ;; the blinking delay can be substantial, it's better to perform
+  ;; tasks such as indentation first, rather than delay them, as it
+  ;; can be jarring to the user to see the buffer change after a
+  ;; "long" delay.
+  (setq-local blink-paren-function nil)
+  (add-hook 'post-command-hook #'gpr-ts-paren--maybe-blink-matching-paren 100 'local))
+
 (provide 'gpr-ts-paren)
 
 ;;; gpr-ts-paren.el ends here

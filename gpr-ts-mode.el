@@ -450,6 +450,9 @@ must be the last segment of the name."
   ;; Align.
   (gpr-ts-align--setup)
 
+  ;; Parenthesis.
+  (gpr-ts-paren--setup)
+
   (treesit-major-mode-setup)
   (run-hooks 'gpr-ts-mode--after-setup-hook))
 
