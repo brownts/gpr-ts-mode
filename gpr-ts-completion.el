@@ -811,7 +811,7 @@ ATTRIBUTE-NAME."
 
 (defun gpr-ts-mode-close-block ()
   "Close the closest surrounding block."
-  (interactive)
+  (interactive nil gpr-ts-mode)
   (when-let* ((prev-node (gpr-ts-mode--prev-node (point)))
               (node (gpr-ts-mode--matching-prev-node
                      prev-node
