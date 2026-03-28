@@ -498,6 +498,14 @@ must be the last segment of the name."
                 ;; Suffix for variable documentation in Info
                 ,(rx (or space eol))))))
 
+;; Lazily register mode with speedbar.
+(with-eval-after-load 'speedbar
+  (declare-function speedbar-add-supported-extension "speedbar" (extension))
+  (defvar speedbar-use-imenu-flag)
+  (when speedbar-use-imenu-flag
+    (speedbar-add-supported-extension ".gpr")
+    (speedbar-add-supported-extension ".cgpr")))
+
 (provide 'gpr-ts-mode)
 
 ;;; gpr-ts-mode.el ends here
