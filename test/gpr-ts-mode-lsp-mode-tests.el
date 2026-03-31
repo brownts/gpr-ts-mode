@@ -26,7 +26,7 @@
 (require 'ert-x)
 
 (ert-deftest gpr-ts-mode-test-lsp-mode-config-exists ()
-  "Tests that Eglot contains a server configuration for `gpr-ts-mode'."
+  "Tests that `lsp-mode' contains a server configuration for `gpr-ts-mode'."
   (skip-unless (featurep 'lsp-mode))
   (require 'lsp-ada)
   (let ((client (gethash 'gpr-ls lsp-clients)))
@@ -34,7 +34,7 @@
     (should (memq 'gpr-ts-mode (lsp--client-major-modes client)))))
 
 (ert-deftest gpr-ts-mode-test-lsp-mode-config-language ()
-  "Tests that Eglot correctly determines language for `gpr-ts-mode'."
+  "Tests that `lsp-mode' correctly determines language for `gpr-ts-mode'."
   (skip-unless (and (executable-find "ada_language_server")
                     (featurep 'lsp-mode)))
   (with-file-in-project
@@ -45,6 +45,22 @@
       (let ((language (lsp-buffer-language)))
         (should (stringp language))
         (should (string-equal language "gpr"))))))
+
+(ert-deftest gpr-ts-mode-test-lsp-mode-setup ()
+  "Tests that `lsp-mode' is setup correctly for `gpr-ts-mode'."
+  (skip-unless (and (executable-find "ada_language_server")
+                    (featurep 'lsp-mode)))
+  (with-file-in-project
+      "hello_world.gpr"
+      (ert-resource-file "hello_world")
+      "hello_world.gpr"
+    (with-language-server lsp-mode
+      (dolist (name '(lsp-enable-imenu
+                      lsp-enable-indentation
+                      lsp-enable-on-type-formatting
+                      lsp-semantic-tokens-enable))
+        (should (local-variable-p name))
+        (should (equal (symbol-value name) nil))))))
 
 (provide 'gpr-ts-mode-lsp-mode-tests)
 

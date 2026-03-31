@@ -96,7 +96,6 @@ execution of pre and post command hooks."
     `(progn
        (should (null lsp-mode))
        (let ((lsp-auto-guess-root t)
-             (lsp-enable-indentation nil)
              (lsp-keep-workspace-alive nil))
          (let ((inhibit-message t)
                (initialized nil))

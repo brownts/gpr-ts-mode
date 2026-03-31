@@ -602,6 +602,64 @@ options which don't fit elsewhere.
   the rest of the mode map.  If the =keymap= prefix is set to nil, then
   the mode commands won't be mapped at all.
 
+* LSP Client Support
+
+While ~gpr-ts-mode~ is a fully capable major mode, users may desire to
+utilize an LSP server (i.e., Ada Language Server) in order to enhance
+their experience.  This can provide enhanced capabilities for
+completion, cross-referencing, documentation, etc.  It's up to the
+user to configure the LSP client for a ~gpr-ts-mode~ buffer, typically
+through the use of the ~gpr-ts-mode-hook~ to enable the LSP client minor
+mode.  Those clients which utilize directory local variables for
+configuration (e.g., GPR project filename), may need to hook into the
+~hack-local-variables-hook~ in order to initialize after the directory
+local variables have been initialized.  Refer to the documentation for
+the specific LSP client used for details.
+
+The Ada Language Server allows for client-agnostic configuration
+through a project-specific configuration file (=.als.json=) in addition
+to a user-specific configuration file (=config.json=).  This approach is
+recommended such that users aren't reliant on an LSP client's specific
+configuration peculiarities.  Using this approach also allows the user
+to easily switch between LSP clients (and even editors) with a unified
+configuration.  Refer to the Ada Language Server's documentation for
+specific details on the format and location of these files.
+
+Some Ada Language Server features are known to be problematic with
+Emacs (such as on-type formatting).  Additionally, some Emacs LSP
+clients have default settings which aggressively override similar
+functionality provided by ~gpr-ts-mode~.  As a result, ~gpr-ts-mode~
+provides a way for the settings of each LSP client to be customized
+specifically for use within a ~gpr-ts-mode~ buffer.  The customizations
+are specific to the ~gpr-ts-mode~ buffer and will not impact the
+settings for other major modes using the same LSP client.  This allows
+the LSP client's global settings to be retained for other major modes
+while providing customization for ~gpr-ts-mode~.
+
+A default set of configurations have been provided out-of-the-box to
+optimize the experience with each supported LSP client.  The following
+user options may be adjusted as desired.  For each LSP client, if
+their user option(s) are set to ~nil~, no customization for ~gpr-ts-mode~
+will be applied, allowing the LSP client's global settings to be used
+instead.
+
+- User Option: gpr-ts-lspclient-eglot-stay-out-of ::
+  A ~gpr-ts-mode~ version of ~eglot~'s ~eglot-stay-out-of~ setting.  The
+  global value of ~eglot-stay-out-of~ is merged with this user option to
+  determine the buffer-local value.
+
+- User Option: gpr-ts-lspclient-eglot-ignored-server-capabilities ::
+  A ~gpr-ts-mode~ version of ~eglot~'s ~eglot-ignored-server-capabilities~
+  setting.  The global value of ~eglot-ignored-server-capabilities~ is
+  merged with this user option to determine the buffer-local value.
+
+- User Option: gpr-ts-lspclient-lsp-mode-settings-alist ::
+  An attribute list of ~lsp-mode~ settings whose key should be an
+  ~lsp-mode~ variable to set and the value is the corresponding value
+  which the variable should receive.  These variables are set
+  buffer-locally to avoid impacting settings outside of ~gpr-ts-mode~
+  buffers.
+
 * Troubleshooting
 
 ** Org Mode Source Code Blocks
@@ -623,25 +681,6 @@ setting:
     (add-to-list 'org-src-lang-modes '("gpr" . gpr-ts)))
 #+END_SRC
 
-** LSP Overriding Imenu
-
-The mode's Imenu support might be overridden if an LSP client is used
-with the major mode.  The mode typically provides a more organized and
-configurable Imenu experience than that provided by the Language
-Server.  In such cases, in order to use the mode's built-in Imenu
-support rather than that provided via the Language Server, Imenu
-support must be disabled in the LSP client's configuration.  For
-Eglot, LSP-provided Imenu is disabled by adding the =imenu= symbol to
-the list in the =eglot-stay-out-of= variable.
-#+BEGIN_SRC elisp
-  (setq eglot-stay-out-of '(imenu))
-#+END_SRC
-For =lsp-mode=, LSP-provided Imenu is disabled by clearing the
-~lsp-enable-imenu~ user option.
-#+BEGIN_SRC elisp
-  (setq lsp-enable-imenu nil)
-#+END_SRC
-
 ** LSP Overriding Completion
 
 The mode's completion support might be overridden if an LSP client is
@@ -653,18 +692,22 @@ When the LSP client completion support does not explicitly indicate
 that it's completion support is "not exclusive", Emacs may not query
 the mode's completion support.  To identify the completion provider,
 the first thing to do is examine the buffer-local
-=completion-at-point-functions= variable.  It's a list of completion
+~completion-at-point-functions~ variable.  It's a list of completion
 functions.  They will be queried in the order listed.  If the
-=gpr-ts-mode='s completion function is not listed first, it won't be
+~gpr-ts-mode~'s completion function is not listed first, it won't be
 queried first (or maybe at all depending on the provider's exclusivity
 setting).  It should be obvious from the function name listed whether
 the provider is an LSP client.
 
-For Eglot, LSP-provided completion can be disabled by adding
-=:completionProvider= to =eglot-ignored-server-capabilities=.  For
-=lsp-mode=, completion can be configured through the
-~lsp-completion-enable~ user option.  Additionally, completion can be
-toggled manually with the =lsp-completion-mode= minor mode.
+For ~eglot~, LSP-provided completion can be disabled for ~gpr-ts-mode~ by
+updating ~gpr-ts-lspclient-eglot-ignored-server-capabilities~ to add
+~:completionProvider~.
+
+For ~lsp-mode~, LSP-provided completion can be disabled for ~gpr-ts-mode~
+by updating ~gpr-ts-lspclient-lsp-mode-settings-alist~ to add the
+attribute ~lsp-completion-enable~ with the value ~nil~.  Additionally,
+completion can be toggled manually for ~lsp-mode~ with the
+~lsp-completion-mode~ minor mode (i.e., ~M-x lsp-completion-mode~).
 
 * Example Configuration
 

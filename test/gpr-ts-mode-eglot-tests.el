@@ -30,7 +30,7 @@
   (should (gpr-ts-lspclient-eglot--find-mode-config 'gpr-ts-mode)))
 
 (ert-deftest gpr-ts-mode-test-eglot-config-language ()
-  "Tests that Eglot correctly determiens language for `gpr-ts-mode'."
+  "Tests that Eglot correctly determines language for `gpr-ts-mode'."
   (skip-unless (and (gpr-ts-lspclient-eglot--find-mode-config 'gpr-ts-mode)
                     (executable-find "ada_language_server")))
   (with-file-in-project
@@ -46,6 +46,23 @@
                    (t (ert-fail "Unknown language query API")))))
         (should (stringp language))
         (should (string-equal language "gpr"))))))
+
+(ert-deftest gpr-ts-mode-test-eglot-setup ()
+  "Tests that Eglot is setup correctly for `gpr-ts-mode'."
+  (skip-unless (and (gpr-ts-lspclient-eglot--find-mode-config 'gpr-ts-mode)
+                    (executable-find "ada_language_server")))
+  (with-file-in-project
+      "hello_world.gpr"
+      (ert-resource-file "hello_world")
+      "hello_world.gpr"
+    (with-language-server eglot
+      (should (local-variable-p 'eglot-stay-out-of))
+      (should (equal (symbol-value 'eglot-stay-out-of)
+                     '(imenu)))
+      (should (local-variable-p 'eglot-ignored-server-capabilites))
+      (should (equal (symbol-value 'eglot-ignored-server-capabilites)
+                     '(:documentOnTypeFormattingProvider
+                       :semanticTokensProvider))))))
 
 (provide 'gpr-ts-mode-eglot-tests)
 

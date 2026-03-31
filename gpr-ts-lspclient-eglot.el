@@ -21,7 +21,33 @@
 
 ;;; Code:
 
+(require 'gpr-ts-lspclient)
 (require 'eglot)
+
+;;;; Customization
+
+(defcustom gpr-ts-lspclient-eglot-stay-out-of
+  '(;; Let major mode control Imenu
+    imenu)
+  "Mode specific settings for Eglot's `eglot-stay-out-of'."
+  :type '(repeat symbol)
+  :group 'gpr-ts-lspclient
+  :link '(custom-manual :tag "LSP Client Support" "(gpr-ts-mode)LSP Client Support")
+  :package-version '(gpr-ts-mode . "0.8.0"))
+
+(defcustom gpr-ts-lspclient-eglot-ignored-server-capabilities
+  '(;; Interferes with Emacs indenting
+    ;; See: https://github.com/AdaCore/ada_language_server/issues/1197
+    :documentOnTypeFormattingProvider
+    ;; No benefit for major mode
+    :semanticTokensProvider)
+  "Mode specific settings for Eglot's `eglot-ignored-server-capabilities'."
+  :type '(repeat symbol)
+  :group 'gpr-ts-lspclient
+  :link '(custom-manual :tag "LSP Client Support" "(gpr-ts-mode)LSP Client Support")
+  :package-version '(gpr-ts-mode . "0.8.0"))
+
+;;;; Configuration
 
 (defun gpr-ts-lspclient-eglot--find-mode-config (mode-to-find)
   "Find Eglot server configuration for MODE-TO-FIND."
@@ -45,8 +71,8 @@
    (progn (require 'eglot)
           eglot-server-programs)))
 
-(defun gpr-ts-lspclient-eglot--setup ()
-  "Setup Eglot for mode.
+(defun gpr-ts-lspclient-eglot--config ()
+  "Configure Eglot for mode.
 
 No configuration was provided for `gpr-ts-mode' in the version of Eglot
 as shipped with Emacs 29, so it is added if it cannot be found.
@@ -74,7 +100,25 @@ included if the mode configuration must be added."
       (add-to-list 'eglot-server-programs
                    (list `((gpr-mode :language-id "gpr") ,config) "ada_language_server" "--language-gpr")))))
 
-(gpr-ts-lspclient-eglot--setup)
+(gpr-ts-lspclient-eglot--config)
+
+;;;; Setup
+
+(defun gpr-ts-lspclient-eglot--setup ()
+  "Mode specific settings for Eglot."
+  (when gpr-ts-lspclient-eglot-stay-out-of
+    (setq-local eglot-stay-out-of
+                (seq-union (default-value 'eglot-stay-out-of)
+                           gpr-ts-lspclient-eglot-stay-out-of)))
+  (when gpr-ts-lspclient-eglot-ignored-server-capabilities
+    (setq-local eglot-ignored-server-capabilities
+                (seq-union (default-value 'eglot-ignored-server-capabilities)
+                           gpr-ts-lspclient-eglot-ignored-server-capabilities))))
+
+(add-hook 'gpr-ts-lspclient-setup-hook #'gpr-ts-lspclient-eglot--setup)
+
+(when (derived-mode-p 'gpr-ts-mode)
+  (gpr-ts-lspclient-eglot--setup))
 
 (provide 'gpr-ts-lspclient-eglot)
 

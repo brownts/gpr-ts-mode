@@ -40,6 +40,7 @@
 (require 'gpr-ts-completion)
 (require 'gpr-ts-imenu)
 (require 'gpr-ts-indent)
+(require 'gpr-ts-lspclient)
 (require 'gpr-ts-paren)
 (require 'cl-generic)
 (require 'lisp-mnt)
@@ -452,6 +453,9 @@ must be the last segment of the name."
 
   ;; Parenthesis.
   (gpr-ts-paren--setup)
+
+  ;; LSP Client.
+  (run-hooks 'gpr-ts-lspclient-setup-hook)
 
   (treesit-major-mode-setup)
   (run-hooks 'gpr-ts-mode--after-setup-hook))
