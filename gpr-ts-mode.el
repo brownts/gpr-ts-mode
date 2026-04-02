@@ -49,20 +49,7 @@
 (require 'treesit)
 (eval-when-compile (require 'rx))
 
-(declare-function treesit-available-p "treesit.c")
-(declare-function treesit-induce-sparse-tree "treesit.c")
-(declare-function treesit-language-available-p "treesit.c")
-(declare-function treesit-parser-create "treesit.c")
-(declare-function treesit-node-check "treesit.c")
-(declare-function treesit-node-child-by-field-name "treesit.c")
-(declare-function treesit-node-child-count "treesit.c")
-(declare-function treesit-node-end "treesit.c")
-(declare-function treesit-node-eq "treesit.c")
-(declare-function treesit-node-next-sibling "treesit.c")
-(declare-function treesit-node-parent "treesit.c")
-(declare-function treesit-node-prev-sibling "treesit.c")
-(declare-function treesit-node-start "treesit.c")
-(declare-function treesit-node-type "treesit.c")
+(gpr-ts-mode--declare-treesit-functions)
 
 (defcustom gpr-ts-mode-grammar "https://github.com/brownts/tree-sitter-gpr"
   "Configuration for downloading and installing the tree-sitter language grammar.

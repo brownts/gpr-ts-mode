@@ -24,6 +24,8 @@
 (require 'gpr-ts-common)
 (require 'treesit)
 
+(gpr-ts-mode--declare-treesit-functions)
+
 (defcustom gpr-ts-mode-indent-offset 3
   "Indentation of statements."
   :type 'integer

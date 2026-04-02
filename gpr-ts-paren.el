@@ -26,6 +26,8 @@
 (eval-when-compile (require 'rx))
 (require 'treesit)
 
+(gpr-ts-mode--declare-treesit-functions)
+
 ;;;; `show-paren-mode' support
 
 (defconst gpr-ts-paren--show-paren-info

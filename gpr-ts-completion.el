@@ -26,13 +26,7 @@
 (eval-when-compile (require 'rx))
 (require 'treesit)
 
-(declare-function treesit-induce-sparse-tree "treesit.c" (root predicate &optional process-fn depth))
-(declare-function treesit-node-check         "treesit.c" (node property))
-(declare-function treesit-node-end           "treesit.c" (node))
-(declare-function treesit-node-next-sibling  "treesit.c" (node &optional named))
-(declare-function treesit-node-parent        "treesit.c" (node))
-(declare-function treesit-node-start         "treesit.c" (node))
-(declare-function treesit-node-type          "treesit.c" (node))
+(gpr-ts-mode--declare-treesit-functions)
 
 (defcustom gpr-ts-mode-completion-categories
   '(end-name package-name attribute-name)

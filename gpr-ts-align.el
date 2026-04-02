@@ -26,6 +26,8 @@
 (require 'rx)
 (require 'treesit)
 
+(gpr-ts-mode--declare-treesit-functions)
+
 (defcustom gpr-ts-mode-align-region-separate #'gpr-ts-align--contains-separator-p
   "`gpr-ts-mode' specific value of `align-region-separate'.
 

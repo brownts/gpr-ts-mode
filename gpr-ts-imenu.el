@@ -24,6 +24,8 @@
 (require 'gpr-ts-common)
 (require 'treesit)
 
+(gpr-ts-mode--declare-treesit-functions)
+
 (defcustom gpr-ts-mode-imenu-categories
   '(attribute package type variable with-clause)
   "Configuration of Imenu categories."
