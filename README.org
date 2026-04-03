@@ -95,6 +95,67 @@ available packages and to perform the installation, as follows:
 - =M-x package-refresh-contents RET=
 - =M-x package-install RET gpr-ts-mode RET=
 
+** From Doom Emacs
+
+Doom Emacs provides an Ada language module, which when properly
+configured, enables both ~ada-ts-mode~ and ~gpr-ts-mode~ for editing Ada
+and GNAT Project files respectively.  This requires making both global
+and language module specific configuration changes within the Doom
+Emacs =init.el=.  The global configuration changes are to enable
+Tree-Sitter and optionally LSP support within Doom Emacs.  If these
+are already enabled, which they may be if those modules were
+previously enabled for other language modes, those configuration steps
+can be skipped.
+
+It's expected that a Doom Emacs user is familiar with making changes
+to the configuration and then running the corresponding =doom sync=
+command in order for the configuration to be realized.  The following
+only details the changes necessary to =init.el=, not the process for
+rebuilding the user's configuration afterwards.  For general
+information on configuring Doom Emacs, refer to the Doom Emacs
+documentation.
+
+The following steps should be followed for modifying the
+configuration.  A diff is shown illustrating the before and after
+sections within the Doom Emacs =init.el= file, primarily showing where a
+comment should be removed to enable the corresponding capability.
+
+- Enable the Doom Emacs =Tree-Sitter= module.  In order to use
+  ~gpr-ts-mode~, Tree-Sitter support must be enabled globally within
+  Doom Emacs. Within the =:tools= section, remove the comment before
+  =tree-sitter= support.
+  #+BEGIN_SRC diff
+-       ;;tree-sitter       ; syntax and parsing, sitting in a tree...
++       tree-sitter       ; syntax and parsing, sitting in a tree...
+  #+END_SRC
+- Optionally enable the Doom Emacs =LSP= module.  If you'd like to use
+  the Ada Language Server with ~gpr-ts-mode~, LSP support must first be
+  enabled globally within Doom Emacs.  Within the =:tools= section,
+  remove the comment before =lsp= support.  Note that different LSP
+  clients may be configured within Doom Emacs, but this only
+  demonstrates enabling the Eglot LSP client.  See Doom Emacs
+  documentation if you'd like to use a different LSP client instead.
+  #+BEGIN_SRC diff
+-       ;;(lsp +eglot)      ; M-x vscode
++       (lsp +eglot)      ; M-x vscode
+  #+END_SRC
+- Enable and configure Ada and GNAT Project support.  The Ada language
+  module needs to be enabled and the corresponding capabilities
+  configured within the language module.  In order to use ~gpr-ts-mode~,
+  Tree-Sitter must be enabled for the language module.  The following
+  demonstrates enabling the =ada= module in the =:lang= section and
+  configuring Tree-Sitter and LSP support within the module.  If you'd
+  prefer not to enable LSP mode, just remove that portion of the
+  configuration.
+  #+BEGIN_SRC diff
+-       ;;ada  ; In strong typing we (blindly) trust
++       (ada +tree-sitter +lsp)  ; In strong typing we (blindly) trust
+  #+END_SRC
+
+After rebuilding the configuration with the above changes, editing of
+Ada and GNAT Project files within Doom Emacs will use ~ada-ts-mode~ and
+~gpr-ts-mode~ respectively.
+
 ** From the Git Repository
 
 Installation directly from the source repository is possible using
@@ -745,8 +806,9 @@ package in its absence.
 - Recommended packages:
   - [[https://github.com/brownts/ada-ts-mode][ada-ts-mode]]: Tree-sitter based Ada Major Mode
   - [[https://github.com/brownts/gpr-yasnippets][gpr-yasnippets]]: GNAT Project snippets for use with YASnippet
-- Extended example configuration:
-  - [[https://github.com/brownts/dotemacs-ada][dotemacs-ada]]: Emacs configuration for Ada & GNAT Project
+- Configurations which use ~gpr-ts-mode~:
+  - [[https://github.com/brownts/dotemacs-ada][dotemacs-ada]]: Emacs example configuration for Ada & GNAT Project
+  - [[https://github.com/doomemacs/doomemacs/tree/master/modules/lang/ada][Doom Emacs Ada Language Module]]
 
 * Command Index
 :PROPERTIES:

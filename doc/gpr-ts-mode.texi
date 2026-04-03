@@ -69,6 +69,7 @@ required for @samp{outline-minor-mode} to work with @samp{gpr-ts-mode}.
 Installation
 
 * From the MELPA Package Archive::
+* From Doom Emacs::
 * From the Git Repository::
 
 Code Alignment
@@ -141,6 +142,7 @@ configuration.
 
 @menu
 * From the MELPA Package Archive::
+* From Doom Emacs::
 * From the Git Repository::
 @end menu
 
@@ -167,6 +169,73 @@ available packages and to perform the installation, as follows:
 @item
 @samp{M-x package-install RET gpr-ts-mode RET}
 @end itemize
+
+@node From Doom Emacs
+@section From Doom Emacs
+
+Doom Emacs provides an Ada language module, which when properly
+configured, enables both @code{ada-ts-mode} and @code{gpr-ts-mode} for editing Ada
+and GNAT Project files respectively.  This requires making both global
+and language module specific configuration changes within the Doom
+Emacs @samp{init.el}.  The global configuration changes are to enable
+Tree-Sitter and optionally LSP support within Doom Emacs.  If these
+are already enabled, which they may be if those modules were
+previously enabled for other language modes, those configuration steps
+can be skipped.
+
+It's expected that a Doom Emacs user is familiar with making changes
+to the configuration and then running the corresponding @samp{doom sync}
+command in order for the configuration to be realized.  The following
+only details the changes necessary to @samp{init.el}, not the process for
+rebuilding the user's configuration afterwards.  For general
+information on configuring Doom Emacs, refer to the Doom Emacs
+documentation.
+
+The following steps should be followed for modifying the
+configuration.  A diff is shown illustrating the before and after
+sections within the Doom Emacs @samp{init.el} file, primarily showing where a
+comment should be removed to enable the corresponding capability.
+
+@itemize
+@item
+Enable the Doom Emacs @samp{Tree-Sitter} module.  In order to use
+@code{gpr-ts-mode}, Tree-Sitter support must be enabled globally within
+Doom Emacs. Within the @samp{:tools} section, remove the comment before
+@samp{tree-sitter} support.
+@example
+-       ;;tree-sitter       ; syntax and parsing, sitting in a tree...
++       tree-sitter       ; syntax and parsing, sitting in a tree...
+@end example
+@item
+Optionally enable the Doom Emacs @samp{LSP} module.  If you'd like to use
+the Ada Language Server with @code{gpr-ts-mode}, LSP support must first be
+enabled globally within Doom Emacs.  Within the @samp{:tools} section,
+remove the comment before @samp{lsp} support.  Note that different LSP
+clients may be configured within Doom Emacs, but this only
+demonstrates enabling the Eglot LSP client.  See Doom Emacs
+documentation if you'd like to use a different LSP client instead.
+@example
+-       ;;(lsp +eglot)      ; M-x vscode
++       (lsp +eglot)      ; M-x vscode
+@end example
+@item
+Enable and configure Ada and GNAT Project support.  The Ada language
+module needs to be enabled and the corresponding capabilities
+configured within the language module.  In order to use @code{gpr-ts-mode},
+Tree-Sitter must be enabled for the language module.  The following
+demonstrates enabling the @samp{ada} module in the @samp{:lang} section and
+configuring Tree-Sitter and LSP support within the module.  If you'd
+prefer not to enable LSP mode, just remove that portion of the
+configuration.
+@example
+-       ;;ada  ; In strong typing we (blindly) trust
++       (ada +tree-sitter +lsp)  ; In strong typing we (blindly) trust
+@end example
+@end itemize
+
+After rebuilding the configuration with the above changes, editing of
+Ada and GNAT Project files within Doom Emacs will use @code{ada-ts-mode} and
+@code{gpr-ts-mode} respectively.
 
 @node From the Git Repository
 @section From the Git Repository
@@ -906,10 +975,12 @@ Recommended packages:
 @uref{https://github.com/brownts/gpr-yasnippets, gpr-yasnippets}: GNAT Project snippets for use with YASnippet
 @end itemize
 @item
-Extended example configuration:
+Configurations which use @code{gpr-ts-mode}:
 @itemize
 @item
-@uref{https://github.com/brownts/dotemacs-ada, dotemacs-ada}: Emacs configuration for Ada & GNAT Project
+@uref{https://github.com/brownts/dotemacs-ada, dotemacs-ada}: Emacs example configuration for Ada & GNAT Project
+@item
+@uref{https://github.com/doomemacs/doomemacs/tree/master/modules/lang/ada, Doom Emacs Ada Language Module}
 @end itemize
 @end itemize
 
