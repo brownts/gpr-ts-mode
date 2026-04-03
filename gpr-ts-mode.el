@@ -44,7 +44,6 @@
 (require 'gpr-ts-indent)
 (require 'gpr-ts-lspclient)
 (require 'gpr-ts-paren)
-(require 'cl-generic)
 (require 'lisp-mnt)
 (require 'treesit)
 (eval-when-compile (require 'rx))

@@ -23,7 +23,6 @@
 
 (require 'gpr-ts-common)
 (require 'paren)
-(eval-when-compile (require 'rx))
 (require 'treesit)
 
 (gpr-ts-mode--declare-treesit-functions)

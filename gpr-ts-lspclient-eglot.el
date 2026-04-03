@@ -68,8 +68,7 @@
                                 (eq mode-to-find (car mode)))))
                      modes)))
        (cons modes contact)))
-   (progn (require 'eglot)
-          eglot-server-programs)))
+   eglot-server-programs))
 
 (defun gpr-ts-lspclient-eglot--config ()
   "Configure Eglot for mode.
